@@ -116,6 +116,7 @@ Reglas:
 - 4 a 7 palabras.
 - Unidad gramatical con sentido real.
 - Concordancia obligatoria entre sujeto, verbo, genero y numero.
+- Si llamas a un grupo en plural, el verbo tambien debe ir en plural.
 - Comedia jugable, concreta, no poetica.
 - Espanol natural y oral: una persona podria decirlo en voz alta sin que suene roto.
 - Sin palabras inventadas, deformadas, truncadas, siglas, abreviaturas con puntos, spanglish, markdown, comillas, parentesis ni explicaciones.
@@ -178,7 +179,11 @@ function tituloTieneFormatoRoto(titulo: string): boolean {
 function tituloTieneConcordanciaRota(titulo: string): boolean {
   const normalizado = normalizarTituloParaValidacion(titulo);
 
-  return /\b(el|la|los|las)\s+\S+\s+se\s+(ha|han)\s+\S+(ado|ido|to|so|cho)\s+tod[oa]s?\b/.test(normalizado);
+  const cuantificadorMalEncajado =
+    /\b(el|la|los|las)\s+\S+\s+se\s+(ha|han)\s+\S+(ado|ido|to|so|cho)\s+tod[oa]s?\b/.test(normalizado);
+  const vocativoPluralConVerboSingular = /^[a-zñ]+s,\s+[a-zñ]+[ae]\b/.test(normalizado);
+
+  return cuantificadorMalEncajado || vocativoPluralConVerboSingular;
 }
 
 function tituloTieneSentidoBasico(titulo: string): boolean {
