@@ -2,9 +2,8 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 
-const RETARDO_ARRANQUE_VOZ_MS = 180;
-const RETARDO_TRAS_CALENTAMIENTO_MS = 120;
-const TEXTO_CALENTAMIENTO_VOZ = '.';
+const RETARDO_TRAS_CANCELAR_MS = 260;
+const PAUSA_INICIAL_TEXTO = '... ... ';
 
 function obtenerVozHumanaSinHelena(): SpeechSynthesisVoice | null {
   const voces = window.speechSynthesis.getVoices();
@@ -37,7 +36,7 @@ function prepararTextoParaVoz(texto: string): string {
     return '';
   }
 
-  return limpio;
+  return `${PAUSA_INICIAL_TEXTO}${limpio}`;
 }
 
 function aplicarVozComun(utterance: SpeechSynthesisUtterance, vozElegida: SpeechSynthesisVoice | null) {
@@ -50,6 +49,34 @@ function aplicarVozComun(utterance: SpeechSynthesisUtterance, vozElegida: Speech
 
   utterance.rate = 1.08;
   utterance.pitch = 1.0;
+}
+
+async function despertarSalidaAudio(): Promise<void> {
+  const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+
+  if (!AudioContextClass) {
+    return;
+  }
+
+  const audioContext = new AudioContextClass();
+
+  if (audioContext.state === 'suspended') {
+    await audioContext.resume();
+  }
+
+  const oscillator = audioContext.createOscillator();
+  const gain = audioContext.createGain();
+
+  oscillator.frequency.value = 440;
+  gain.gain.value = 0.0001;
+  oscillator.connect(gain);
+  gain.connect(audioContext.destination);
+  oscillator.start();
+
+  await new Promise((resolve) => setTimeout(resolve, 180));
+
+  oscillator.stop();
+  await audioContext.close();
 }
 
 export function useSpeechSynthesisActor(params: {
@@ -114,50 +141,38 @@ export function useSpeechSynthesisActor(params: {
     limpiarTimeoutVoz();
     window.speechSynthesis.cancel();
 
-    timeoutVozRef.current = setTimeout(() => {
+    timeoutVozRef.current = setTimeout(async () => {
       const vozElegida = obtenerVozHumanaSinHelena();
-      const calentamiento = new SpeechSynthesisUtterance(TEXTO_CALENTAMIENTO_VOZ);
 
-      aplicarVozComun(calentamiento, vozElegida);
-      calentamiento.volume = 0;
+      try {
+        await despertarSalidaAudio();
+      } catch (error) {
+        console.warn('No se pudo despertar la salida de audio antes de la voz:', error);
+      }
 
-      calentamiento.onstart = () => {
+      const utterance = new SpeechSynthesisUtterance(textoPreparado);
+      aplicarVozComun(utterance, vozElegida);
+
+      utterance.onstart = () => {
         reproduciendoRef.current = true;
         params.onStart();
       };
 
-      const reproducirTextoReal = () => {
-        timeoutVozRef.current = setTimeout(() => {
-          const utterance = new SpeechSynthesisUtterance(textoPreparado);
-          aplicarVozComun(utterance, vozElegida);
-
-          utterance.onend = () => {
-            reproduciendoRef.current = false;
-            params.onEnd();
-            callbackAlTerminar();
-          };
-
-          utterance.onerror = (event) => {
-            reproduciendoRef.current = false;
-            console.error('Error en sintesis de voz:', event);
-            params.onEnd();
-            callbackAlTerminar();
-          };
-
-          window.speechSynthesis.speak(utterance);
-        }, RETARDO_TRAS_CALENTAMIENTO_MS);
+      utterance.onend = () => {
+        reproduciendoRef.current = false;
+        params.onEnd();
+        callbackAlTerminar();
       };
 
-      calentamiento.onend = reproducirTextoReal;
-      calentamiento.onerror = reproducirTextoReal;
-
-      try {
-        window.speechSynthesis.speak(calentamiento);
-      } catch (error) {
-        console.error('Error en calentamiento de sintesis de voz:', error);
-        reproducirTextoReal();
+      utterance.onerror = (event) => {
+        reproduciendoRef.current = false;
+        console.error('Error en sintesis de voz:', event);
+        params.onEnd();
+        callbackAlTerminar();
       };
-    }, RETARDO_ARRANQUE_VOZ_MS);
+
+      window.speechSynthesis.speak(utterance);
+    }, RETARDO_TRAS_CANCELAR_MS);
   }, [limpiarTimeoutVoz, params]);
 
   return {
