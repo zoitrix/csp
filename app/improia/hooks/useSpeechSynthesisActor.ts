@@ -2,8 +2,9 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 
-const RETARDO_TRAS_CANCELAR_MS = 260;
-const PAUSA_INICIAL_TEXTO = '... ... ';
+const RETARDO_TRAS_CANCELAR_MS = 320;
+const DURACION_DESPERTAR_AUDIO_MS = 260;
+const RETARDO_TRAS_DESPERTAR_AUDIO_MS = 140;
 
 function obtenerVozHumanaSinHelena(): SpeechSynthesisVoice | null {
   const voces = window.speechSynthesis.getVoices();
@@ -30,13 +31,7 @@ function obtenerVozHumanaSinHelena(): SpeechSynthesisVoice | null {
 }
 
 function prepararTextoParaVoz(texto: string): string {
-  const limpio = texto.replace(/\s+/g, ' ').trim();
-
-  if (!limpio) {
-    return '';
-  }
-
-  return `${PAUSA_INICIAL_TEXTO}${limpio}`;
+  return texto.replace(/\s+/g, ' ').trim();
 }
 
 function aplicarVozComun(utterance: SpeechSynthesisUtterance, vozElegida: SpeechSynthesisVoice | null) {
@@ -68,15 +63,20 @@ async function despertarSalidaAudio(): Promise<void> {
   const gain = audioContext.createGain();
 
   oscillator.frequency.value = 440;
-  gain.gain.value = 0.0001;
+  gain.gain.value = 0.002;
   oscillator.connect(gain);
   gain.connect(audioContext.destination);
   oscillator.start();
 
-  await new Promise((resolve) => setTimeout(resolve, 180));
+  await new Promise((resolve) => setTimeout(resolve, DURACION_DESPERTAR_AUDIO_MS));
 
   oscillator.stop();
-  await audioContext.close();
+
+  window.setTimeout(() => {
+    if (audioContext.state !== 'closed') {
+      audioContext.close().catch(() => undefined);
+    }
+  }, 1200);
 }
 
 export function useSpeechSynthesisActor(params: {
@@ -146,6 +146,7 @@ export function useSpeechSynthesisActor(params: {
 
       try {
         await despertarSalidaAudio();
+        await new Promise((resolve) => setTimeout(resolve, RETARDO_TRAS_DESPERTAR_AUDIO_MS));
       } catch (error) {
         console.warn('No se pudo despertar la salida de audio antes de la voz:', error);
       }
