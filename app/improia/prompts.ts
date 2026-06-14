@@ -29,6 +29,8 @@ export function crearConsignasDirector(fase: FaseActo, titulo: string): string {
 - No exijas que todo aparezca en la primera frase, pero si debe quedar claro durante el arranque de la conversacion.
 - No suspendas por falta de exposicion escolar si el actor conecta tematicamente con el titulo mediante una norma, prohibicion, politica, queja o conflicto social claro.
 - Si el titulo sugiere una regla absurda y el actor la convierte en queja activa o debate entre personajes, considera que el titulo esta integrado.
+- La conexion con el titulo debe venir de una aportacion del ACTOR (Usuario), no solo de una interpretacion del CO-ACTOR (IA).
+- Si las lineas del actor no contienen ninguna imagen, lugar, objeto, accion o tema reconocible del titulo, "aprobado" DEBE ser false.
 - Si el usuario evade el titulo "${titulo}" por completo, dice sinsentidos inconexos o no aporta plataforma, debes poner "aprobado": false.`;
   }
 

@@ -32,6 +32,77 @@ function ultimoTurnoUsuario(historial: MensajeChat[]): string {
   return [...historial].reverse().find((mensaje) => mensaje.role === 'user')?.content.trim() || '';
 }
 
+const PALABRAS_VACIAS_TITULO = new Set([
+  'a',
+  'al',
+  'como',
+  'con',
+  'de',
+  'del',
+  'el',
+  'en',
+  'es',
+  'esta',
+  'este',
+  'hay',
+  'la',
+  'las',
+  'lo',
+  'los',
+  'para',
+  'por',
+  'que',
+  'se',
+  'sin',
+  'su',
+  'sus',
+  'tiene',
+  'un',
+  'una',
+  'vende',
+  'y',
+]);
+
+function normalizarTextoComparacion(texto: string): string {
+  return texto
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[?\u00bf!\u00a1.,;:"'()[\]{}]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function raizComparacion(palabra: string): string {
+  if (palabra.length > 6 && palabra.endsWith('es')) {
+    return palabra.slice(0, -2);
+  }
+
+  if (palabra.length > 5 && palabra.endsWith('s')) {
+    return palabra.slice(0, -1);
+  }
+
+  return palabra;
+}
+
+function extraerAnclasTitulo(titulo: string): string[] {
+  return normalizarTextoComparacion(titulo)
+    .split(' ')
+    .map(raizComparacion)
+    .filter((palabra) => palabra.length > 3 && !PALABRAS_VACIAS_TITULO.has(palabra));
+}
+
+function actorIntegraTitulo(titulo: string, textoActor: string): boolean {
+  const anclas = extraerAnclasTitulo(titulo);
+
+  if (anclas.length === 0) {
+    return textoActor.trim().length > 40;
+  }
+
+  const texto = normalizarTextoComparacion(textoActor);
+  return anclas.some((ancla) => texto.includes(ancla));
+}
+
 function desenlacePareceAbierto(historial: MensajeChat[]): boolean {
   const ultimoTurno = ultimoTurnoUsuario(historial);
 
@@ -132,12 +203,15 @@ export async function evaluarActoDirector(params: {
   const resultado = extraerEvaluacionDirector(textoCrudo);
 
   const desenlaceAbierto = params.fase === 'desenlace' && desenlacePareceAbierto(params.historial);
+  const introDesconectada = params.fase === 'intro' && !actorIntegraTitulo(params.titulo, propuestaFinal);
 
   return {
-    aprobado: !!resultado.aprobado && !desenlaceAbierto,
-    comentario: desenlaceAbierto
-      ? 'El nudo tiene energia, pero el ultimo turno deja la accion pendiente o en pregunta. Falta una decision o remate que cierre la obra.'
-      : resultado.comentario || 'Cumple con el ritmo del libreto.',
+    aprobado: !!resultado.aprobado && !desenlaceAbierto && !introDesconectada,
+    comentario: introDesconectada
+      ? 'El actor no integra el titulo en su propia propuesta inicial. Falta una imagen, lugar, objeto o conflicto reconocible del estimulo.'
+      : desenlaceAbierto
+        ? 'El nudo tiene energia, pero el ultimo turno deja la accion pendiente o en pregunta. Falta una decision o remate que cierre la obra.'
+        : resultado.comentario || 'Cumple con el ritmo del libreto.',
     transcripcionAcumulada: propuestaFinal === '[SIN_RESPUESTA]' ? 'Sin intervencion de voz.' : propuestaFinal,
   };
 }
