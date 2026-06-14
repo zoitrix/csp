@@ -102,10 +102,16 @@ ${lineasCoactor || 'El co-actor no ha intervenido.'}
 - Una introduccion imperfecta puede aprobar si establece una plataforma jugable conectada al titulo.
 - Un desenlace solo puede aprobar si hay cierre, no solo escalada.
 
+[CALIDAD DEL COMENTARIO]
+- El comentario debe tener entre 70 y 110 palabras.
+- Debe mencionar al menos dos detalles concretos del dialogo: objetos, lugares, decisiones, frases, problemas o giros que hayan aparecido.
+- No escribas una frase generica que podria valer para cualquier obra.
+- Explica brevemente por que aprueba o rechaza este criterio y que faltaria mejorar.
+
 [FORMATO DE SALIDA ESTRICTO]
 Devuelve EXCLUSIVAMENTE un objeto JSON con esta estructura exacta:
 {
   "aprobado": true o false,
-  "comentario": "Tu critica teatral breve de maximo 35 palabras."
+  "comentario": "Critica teatral de 70 a 110 palabras, con detalles concretos del dialogo."
 }`;
 }

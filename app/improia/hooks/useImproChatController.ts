@@ -47,8 +47,8 @@ function evaluarCriterioLocal(fase: FaseActo, historial: MensajeChat[], textoAct
     return {
       aprobado,
       comentario: aprobado
-        ? 'La plataforma queda suficientemente jugable: hay relacion, situacion y conflicto conectado al titulo.'
-        : 'Falta una plataforma inicial clara: el actor apenas establece situacion, relacion o conflicto.',
+        ? 'La introduccion ofrece una plataforma jugable porque el actor sostiene varias intervenciones, abre una situacion reconocible y empieza a negociar un conflicto con el co-actor. Aunque el Director automatico no pudo completar su lectura, el libreto muestra suficiente relacion escenica, objetivo y tension inicial para arrancar la obra con claridad.'
+        : 'La introduccion queda demasiado debil porque el actor aporta pocas lineas o material demasiado general. Para aprobar, deberia verse una situacion concreta, una relacion escenica y un primer conflicto conectado al titulo, no solo una frase suelta o una respuesta que dependa de que el co-actor invente toda la plataforma.',
       transcripcionAcumulada: textoActor || 'Sin intervencion de voz.',
     };
   }
@@ -62,8 +62,8 @@ function evaluarCriterioLocal(fase: FaseActo, historial: MensajeChat[], textoAct
     return {
       aprobado,
       comentario: aprobado
-        ? 'Hay desarrollo suficiente: el actor sostiene el conflicto, acepta propuestas y empuja la escena hacia complicaciones nuevas.'
-        : 'El desarrollo queda demasiado plano o corto; faltan giros, escalada o complicaciones reconocibles.',
+        ? 'El nudo muestra desarrollo suficiente porque el actor mantiene varias rondas de intercambio, acepta el juego propuesto y empuja la situacion hacia complicaciones nuevas. Se aprecia escucha activa y progresion, aunque convendria concentrar mejor los giros para que no parezcan solo variaciones del mismo problema.'
+        : 'El nudo queda plano o demasiado corto. Para aprobar, la obra necesita una complicacion reconocible: revelacion, obstaculo, cambio de estrategia, amenaza o escalada que transforme la situacion inicial. Aqui el actor no empuja lo bastante el conflicto y la escena no gana una segunda capa dramatica clara.',
       transcripcionAcumulada: textoActor || 'Sin intervencion de voz.',
     };
   }
@@ -74,8 +74,8 @@ function evaluarCriterioLocal(fase: FaseActo, historial: MensajeChat[], textoAct
   return {
     aprobado,
     comentario: aprobado
-      ? 'La escena alcanza un cierre reconocible con una decision o solucion absurda que resuelve el juego planteado.'
-      : 'La escena no termina de cerrar: falta una decision final, consecuencia visible o remate definitivo.',
+      ? 'El desenlace alcanza un cierre reconocible porque el actor participa en una decision final y la escena deja de abrir problemas nuevos. La solucion puede ser absurda o sencilla, pero funciona si convierte el juego acumulado en una consecuencia clara para los personajes y permite apagar la escena sin preguntas importantes pendientes.'
+      : 'La escena no termina de cerrar. El actor puede haber sostenido bien el nudo, pero el final necesita una decision, consecuencia visible o remate definitivo. Si la ultima intervencion deja una pregunta, un plan futuro o una amenaza activa, el publico sigue esperando el verdadero cierre.',
     transcripcionAcumulada: textoActor || 'Sin intervencion de voz.',
   };
 }

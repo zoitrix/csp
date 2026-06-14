@@ -2,8 +2,9 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 
-const RETARDO_ARRANQUE_VOZ_MS = 220;
-const PREFIJO_PAUSA_INICIAL = ', ';
+const RETARDO_ARRANQUE_VOZ_MS = 180;
+const RETARDO_TRAS_CALENTAMIENTO_MS = 120;
+const TEXTO_CALENTAMIENTO_VOZ = '.';
 
 function obtenerVozHumanaSinHelena(): SpeechSynthesisVoice | null {
   const voces = window.speechSynthesis.getVoices();
@@ -36,7 +37,19 @@ function prepararTextoParaVoz(texto: string): string {
     return '';
   }
 
-  return `${PREFIJO_PAUSA_INICIAL}${limpio}`;
+  return limpio;
+}
+
+function aplicarVozComun(utterance: SpeechSynthesisUtterance, vozElegida: SpeechSynthesisVoice | null) {
+  if (vozElegida) {
+    utterance.voice = vozElegida;
+    utterance.lang = vozElegida.lang;
+  } else {
+    utterance.lang = 'es-ES';
+  }
+
+  utterance.rate = 1.08;
+  utterance.pitch = 1.0;
 }
 
 export function useSpeechSynthesisActor(params: {
@@ -102,38 +115,48 @@ export function useSpeechSynthesisActor(params: {
     window.speechSynthesis.cancel();
 
     timeoutVozRef.current = setTimeout(() => {
-      const utterance = new SpeechSynthesisUtterance(textoPreparado);
       const vozElegida = obtenerVozHumanaSinHelena();
+      const calentamiento = new SpeechSynthesisUtterance(TEXTO_CALENTAMIENTO_VOZ);
 
-      if (vozElegida) {
-        utterance.voice = vozElegida;
-        utterance.lang = vozElegida.lang;
-      } else {
-        utterance.lang = 'es-ES';
-      }
+      aplicarVozComun(calentamiento, vozElegida);
+      calentamiento.volume = 0;
 
-      utterance.rate = 1.08;
-      utterance.pitch = 1.0;
-
-      utterance.onstart = () => {
+      calentamiento.onstart = () => {
         reproduciendoRef.current = true;
         params.onStart();
       };
 
-      utterance.onend = () => {
-        reproduciendoRef.current = false;
-        params.onEnd();
-        callbackAlTerminar();
+      const reproducirTextoReal = () => {
+        timeoutVozRef.current = setTimeout(() => {
+          const utterance = new SpeechSynthesisUtterance(textoPreparado);
+          aplicarVozComun(utterance, vozElegida);
+
+          utterance.onend = () => {
+            reproduciendoRef.current = false;
+            params.onEnd();
+            callbackAlTerminar();
+          };
+
+          utterance.onerror = (event) => {
+            reproduciendoRef.current = false;
+            console.error('Error en sintesis de voz:', event);
+            params.onEnd();
+            callbackAlTerminar();
+          };
+
+          window.speechSynthesis.speak(utterance);
+        }, RETARDO_TRAS_CALENTAMIENTO_MS);
       };
 
-      utterance.onerror = (event) => {
-        reproduciendoRef.current = false;
-        console.error('Error en sintesis de voz:', event);
-        params.onEnd();
-        callbackAlTerminar();
-      };
+      calentamiento.onend = reproducirTextoReal;
+      calentamiento.onerror = reproducirTextoReal;
 
-      window.speechSynthesis.speak(utterance);
+      try {
+        window.speechSynthesis.speak(calentamiento);
+      } catch (error) {
+        console.error('Error en calentamiento de sintesis de voz:', error);
+        reproducirTextoReal();
+      };
     }, RETARDO_ARRANQUE_VOZ_MS);
   }, [limpiarTimeoutVoz, params]);
 
