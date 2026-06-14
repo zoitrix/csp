@@ -121,6 +121,7 @@ Reglas:
 - Espanol natural y oral: una persona podria decirlo en voz alta sin que suene roto.
 - Sin palabras inventadas, deformadas, truncadas, siglas, abreviaturas con puntos, spanglish, markdown, comillas, parentesis ni explicaciones.
 - Prohibido cerrar con cuantificadores mal encajados o muletillas que rompan la frase.
+- Prohibido escribir frases sobre el titulo o la forma: responde con el titulo final, no con una introduccion.
 - No fuerces la forma obligatoria si eso rompe la gramatica: prioriza una frase correcta y comprensible.
 - Solo mayuscula inicial o nombres propios.
 - No termines con palabra colgante.
@@ -186,6 +187,12 @@ function tituloTieneConcordanciaRota(titulo: string): boolean {
   return cuantificadorMalEncajado || vocativoPluralConVerboSingular;
 }
 
+function tituloEsMetalinguistico(titulo: string): boolean {
+  return /^(el|la|un|una)?\s*(titulo|titular|frase|respuesta|propuesta)\s+(puede|podria|debe|seria|es)\s+/i.test(
+    normalizarTituloParaValidacion(titulo),
+  );
+}
+
 function tituloTieneSentidoBasico(titulo: string): boolean {
   const palabras = extraerPalabrasTitulo(titulo);
   const ultimaPalabra = palabras[palabras.length - 1];
@@ -198,7 +205,12 @@ function tituloTieneSentidoBasico(titulo: string): boolean {
     return false;
   }
 
-  if (tituloTieneRepeticionTorpe(palabras) || tituloTieneFormatoRoto(titulo) || tituloTieneConcordanciaRota(titulo)) {
+  if (
+    tituloTieneRepeticionTorpe(palabras) ||
+    tituloTieneFormatoRoto(titulo) ||
+    tituloTieneConcordanciaRota(titulo) ||
+    tituloEsMetalinguistico(titulo)
+  ) {
     return false;
   }
 
@@ -231,7 +243,7 @@ function limpiarTituloGenerado(textoCrudo: string): string {
     .find(Boolean) || '';
 
   const sinPrefijo = primeraLinea.replace(
-    /^(?:aqui tienes(?: una frase| un titulo)?|frase final|frase|titulo|propuesta|respuesta)\s*:\s*/i,
+    /^(?:aqui tienes(?: una frase| un titulo)?|(?:el|la|un|una)?\s*(?:frase final|frase|titulo|titular|propuesta|respuesta)\s+(?:puede|podria|debe|seria|es)\s*:?\s*|frase final|frase|titulo|titular|propuesta|respuesta)\s*:\s*/i,
     '',
   );
 
