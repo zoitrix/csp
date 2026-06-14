@@ -60,6 +60,14 @@ export function crearPromptDirector(params: {
   const libretoCompleto = params.historial
     .map((mensaje) => `${mensaje.role === 'user' ? 'ACTOR (Usuario)' : 'CO-ACTOR (IA)'}: ${mensaje.content}`)
     .join('\n');
+  const lineasActor = params.historial
+    .filter((mensaje) => mensaje.role === 'user')
+    .map((mensaje) => `ACTOR (Usuario): ${mensaje.content}`)
+    .join('\n');
+  const lineasCoactor = params.historial
+    .filter((mensaje) => mensaje.role === 'assistant')
+    .map((mensaje) => `CO-ACTOR (IA): ${mensaje.content}`)
+    .join('\n');
 
   return `
 [ROL]
@@ -79,8 +87,15 @@ ${crearConsignasDirector(params.fase, params.titulo)}
 [LIBRETO REAL DE LA OBRA]
 ${libretoCompleto || 'El actor no ha intervenido.'}
 
+[LINEAS DEL ACTOR A EVALUAR]
+${lineasActor || 'El actor no ha intervenido.'}
+
+[LINEAS DEL CO-ACTOR SOLO COMO CONTEXTO]
+${lineasCoactor || 'El co-actor no ha intervenido.'}
+
 [REGLA INQUEBRANTABLE DE MUTISMO]
 - Si el ACTOR (Usuario) no tiene ninguna linea registrada en el libreto o solo el texto "[SIN_RESPUESTA]", el campo "aprobado" DEBE ser false.
+- La IA puede haber creado contexto util, pero solo debes aprobar al ACTOR si sus propias lineas aportan o aceptan material suficiente.
 
 [REGLA DE INDEPENDENCIA DE CRITERIOS]
 - Evalua solo el criterio solicitado ahora. Un nudo divertido no puede hacer aprobar el desenlace si no hay cierre real.

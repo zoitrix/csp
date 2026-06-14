@@ -68,6 +68,7 @@ function normalizarTextoComparacion(texto: string): string {
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
+    .replace(/-/g, ' ')
     .replace(/[?\u00bf!\u00a1.,;:"'()[\]{}]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
@@ -94,13 +95,26 @@ function extraerAnclasTitulo(titulo: string): string[] {
 
 function actorIntegraTitulo(titulo: string, textoActor: string): boolean {
   const anclas = extraerAnclasTitulo(titulo);
+  const textoActorLimpio = textoActor.trim();
 
   if (anclas.length === 0) {
-    return textoActor.trim().length > 40;
+    return textoActorLimpio.length > 40;
   }
 
   const texto = normalizarTextoComparacion(textoActor);
-  return anclas.some((ancla) => texto.includes(ancla));
+  const coincidencias = anclas.filter((ancla) => texto.includes(ancla)).length;
+
+  if (coincidencias > 0) {
+    return true;
+  }
+
+  const palabras = texto.split(' ').filter(Boolean);
+  const tieneVerbosDeEscena = /\b(quiero|necesito|vengo|busco|tengo|tenemos|voy|vamos|estoy|estamos|debo|debemos|puedo|podemos|quieres|dices|pasa)\b/.test(
+    texto,
+  );
+  const tieneInterlocucion = /\b(usted|tu|oye|mira|perdone|senor|senora|tio|compañero|companero)\b/.test(texto);
+
+  return palabras.length >= 28 && tieneVerbosDeEscena && tieneInterlocucion;
 }
 
 function desenlacePareceAbierto(historial: MensajeChat[]): boolean {
