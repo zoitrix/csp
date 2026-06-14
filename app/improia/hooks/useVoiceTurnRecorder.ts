@@ -7,9 +7,17 @@ interface DetectorVoz {
   analyser: AnalyserNode | null;
   intervalo: NodeJS.Timeout | null;
   habloAlMenosUnaVez: boolean;
+  iniciadoEn: number | null;
   procesandoSilencio: boolean;
+  ruidoBase: number | null;
   ultimoSonidoEn: number | null;
 }
+
+const CALIBRACION_RUIDO_MS = 700;
+const SILENCIO_DESPUES_DE_HABLAR_MS = 1200;
+const DURACION_MAXIMA_TURNO_CON_VOZ_MS = 12000;
+const UMBRAL_VOZ_MINIMO = 0.025;
+const UMBRAL_SILENCIO_MINIMO = 0.018;
 
 export function useVoiceTurnRecorder() {
   const [escuchando, setEscuchando] = useState(false);
@@ -18,7 +26,9 @@ export function useVoiceTurnRecorder() {
     analyser: null,
     intervalo: null,
     habloAlMenosUnaVez: false,
+    iniciadoEn: null,
     procesandoSilencio: false,
+    ruidoBase: null,
     ultimoSonidoEn: null,
   });
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -41,10 +51,23 @@ export function useVoiceTurnRecorder() {
       analyser: null,
       intervalo: null,
       habloAlMenosUnaVez: false,
+      iniciadoEn: null,
       procesandoSilencio: false,
+      ruidoBase: null,
       ultimoSonidoEn: null,
     };
   }, []);
+
+  function calcularRms(bufferDatos: Uint8Array): number {
+    let sumaCuadrados = 0;
+
+    for (const valor of bufferDatos) {
+      const muestraNormalizada = (valor - 128) / 128;
+      sumaCuadrados += muestraNormalizada * muestraNormalizada;
+    }
+
+    return Math.sqrt(sumaCuadrados / bufferDatos.length);
+  }
 
   const liberarMicrofono = useCallback(() => {
     liberarDetector();
@@ -101,36 +124,52 @@ export function useVoiceTurnRecorder() {
 
       const source = audioContext.createMediaStreamSource(stream);
       const analyser = audioContext.createAnalyser();
-      analyser.fftSize = 512;
+      analyser.fftSize = 1024;
       source.connect(analyser);
+      const iniciadoEn = Date.now();
 
       detectorVozRef.current = {
         audioContext,
         analyser,
         habloAlMenosUnaVez: false,
+        iniciadoEn,
         procesandoSilencio: false,
+        ruidoBase: null,
         ultimoSonidoEn: null,
         intervalo: setInterval(() => {
-          const bufferDatos = new Uint8Array(analyser.frequencyBinCount);
-          analyser.getByteFrequencyData(bufferDatos);
-          const promedioVolumen = bufferDatos.reduce((a, b) => a + b, 0) / bufferDatos.length;
+          const bufferDatos = new Uint8Array(analyser.fftSize);
+          analyser.getByteTimeDomainData(bufferDatos);
+          const rms = calcularRms(bufferDatos);
           const ahora = Date.now();
+          const detector = detectorVozRef.current;
+          const tiempoDesdeInicio = detector.iniciadoEn ? ahora - detector.iniciadoEn : 0;
 
-          if (promedioVolumen > 10) {
-            detectorVozRef.current.habloAlMenosUnaVez = true;
-            detectorVozRef.current.ultimoSonidoEn = ahora;
+          if (tiempoDesdeInicio < CALIBRACION_RUIDO_MS) {
+            detector.ruidoBase = Math.max(detector.ruidoBase ?? 0, rms);
             return;
           }
 
-          const silencioMs = detectorVozRef.current.ultimoSonidoEn ? ahora - detectorVozRef.current.ultimoSonidoEn : 0;
+          const ruidoBase = detector.ruidoBase ?? 0;
+          const umbralVoz = Math.max(UMBRAL_VOZ_MINIMO, ruidoBase * 3);
+          const umbralSilencio = Math.max(UMBRAL_SILENCIO_MINIMO, ruidoBase * 1.7);
+
+          if (rms >= umbralVoz) {
+            detector.habloAlMenosUnaVez = true;
+            detector.ultimoSonidoEn = ahora;
+            return;
+          }
+
+          const silencioMs = detector.ultimoSonidoEn ? ahora - detector.ultimoSonidoEn : 0;
+          const turnoConVozMs = detector.ultimoSonidoEn && detector.iniciadoEn ? ahora - detector.iniciadoEn : 0;
+          const debeCerrarPorSilencio = detector.habloAlMenosUnaVez && rms <= umbralSilencio && silencioMs > SILENCIO_DESPUES_DE_HABLAR_MS;
+          const debeCerrarPorMaximo = detector.habloAlMenosUnaVez && turnoConVozMs > DURACION_MAXIMA_TURNO_CON_VOZ_MS;
 
           if (
             onSilencio &&
-            detectorVozRef.current.habloAlMenosUnaVez &&
-            silencioMs > 1500 &&
-            !detectorVozRef.current.procesandoSilencio
+            (debeCerrarPorSilencio || debeCerrarPorMaximo) &&
+            !detector.procesandoSilencio
           ) {
-            detectorVozRef.current.procesandoSilencio = true;
+            detector.procesandoSilencio = true;
             onSilencio();
           }
         }, 100),
