@@ -1,4 +1,4 @@
-import type { EscenaFinal, TipoFinal } from './types';
+﻿import type { EscenaFinal, TipoFinal } from './types';
 
 export const TIEMPO_INICIAL_FINAL = 30;
 
@@ -21,8 +21,7 @@ export const TIPOS_FINAL: TipoFinal[] = [
       'Formatos cortos de improvisacion, escenas independientes y entrenamiento de estructura clasica aristotelica.',
     criterioExito:
       'Resolucion del conflicto principal de forma clara y contundente, sin dejar preguntas importantes en el aire.',
-    ejemplo:
-      'En una escena sobre una pareja discutiendo si mudarse juntos al extranjero, el alumno mira fijamente a su companero, saca un pasaporte del bolsillo y dice con firmeza: "Ya compre mi boleto. Me voy solo manana por la manana".',
+    ejemplo: 'Descripcion generica sin tema concreto: aplica la tecnica mediante una accion escenica visible, una relacion jugable y una decision clara de personaje.',
     indicadoresLogro:
       'Resuelve el motor de la escena de manera definitiva, ofrece una conclusion satisfactoria para el espectador y limpia los cabos sueltos argumentales antes del apagon.',
     lucesRojas:
@@ -40,8 +39,7 @@ export const TIPOS_FINAL: TipoFinal[] = [
       'Formatos largos, transiciones de capitulos, estructura serial y escenas que entrenan ritmo y timing.',
     criterioExito:
       'Cortar la escena exactamente en el climax de tension, dejando al publico con la intriga en su punto maximo.',
-    ejemplo:
-      'Dos espias intentan desactivar una bomba. Tras una tensa discusion sobre que cable cortar, uno agarra las tijeras, mira al otro y dice: "Si me equivoco, dile a mi familia que...". Corta el cable, la luz de la bomba...',
+    ejemplo: 'Descripcion generica sin tema concreto: aplica la tecnica mediante una accion escenica visible, una relacion jugable y una decision clara de personaje.',
     indicadoresLogro:
       'Identifica el pico mas alto de la accion dramatica para congelar o detener la escena, y plantea una situacion donde las consecuencias futuras quedan claras y sugeridas para el espectador.',
     lucesRojas:
@@ -59,8 +57,7 @@ export const TIPOS_FINAL: TipoFinal[] = [
       'Formatos de comedia, improvisaciones poeticas y entrenamiento de escucha a largo plazo y memoria espacial.',
     criterioExito:
       'Conectar a la perfeccion con el inicio, otorgandole un nuevo significado a la escena.',
-    ejemplo:
-      'La escena comienza con un alumno barriendo el suelo con la mirada perdida. Pasa toda una historia donde confiesa que odia su trabajo, decide rebelarse y es despedido. Al final, regresa al mismo punto exacto, agarra la escoba y sonrie por primera vez.',
+    ejemplo: 'Descripcion generica sin tema concreto: aplica la tecnica mediante una accion escenica visible, una relacion jugable y una decision clara de personaje.',
     indicadoresLogro:
       'Demuestra una excelente memoria escenica al replicar el inicio y justifica organicamente por que los personajes regresan al origen, mostrando el impacto del cambio o el bucle que habitan.',
     lucesRojas:
@@ -78,8 +75,7 @@ export const TIPOS_FINAL: TipoFinal[] = [
       'Formatos de misterio, suspense, drama o comedia inteligente, y alumnos avanzados que dominan la sutileza.',
     criterioExito:
       'La revelacion final es sorprendente pero logica gracias a las pistas sutiles que se sembraron durante la escena.',
-    ejemplo:
-      'Dos cientificos discuten acaloradamente sobre como el especimen no responde a los estimulos. Al final de la escena, uno de ellos suspira, abre una reja imaginaria y dice: "Esta bien, ponlo en libertad".',
+    ejemplo: 'Descripcion generica sin tema concreto: aplica la tecnica mediante una accion escenica visible, una relacion jugable y una decision clara de personaje.',
     indicadoresLogro:
       'Siembra pistas validas durante el desarrollo sin hacerlas evidentes, y ejecuta la revelacion final con total coherencia, provocando una recontextualizacion inmediata en la mente del espectador.',
     lucesRojas:
@@ -97,8 +93,7 @@ export const TIPOS_FINAL: TipoFinal[] = [
       'Escenas comicas, parodias de genero y entrenamiento de modulacion de energia e intensidad en escena.',
     criterioExito:
       'Elevar la tension al maximo y desinflarla de golpe hacia algo cotidiano con un ritmo comico excelente.',
-    ejemplo:
-      'Un guerrero arrodillado ante su rey en mitad de una musica dramatica imaginaria: "Mi senor, el ejercito oscuro ha cruzado la muralla, el reino arde, todo esta perdido... que hacemos?". El rey lo mira con solemnidad, hace una pausa y dice: "Primero, cambiaremos el wifi".',
+    ejemplo: 'Descripcion generica sin tema concreto: aplica la tecnica mediante una accion escenica visible, una relacion jugable y una decision clara de personaje.',
     indicadoresLogro:
       'Mantiene una actuacion honesta y de alta intensidad dramatica durante el nudo de la escena y ejecuta la caida de tension de forma drastica y rapida, clavando el timing del chiste.',
     lucesRojas:

@@ -1,4 +1,4 @@
-import type { EstrategiaInicio } from './types';
+﻿import type { EstrategiaInicio } from './types';
 
 export const TIEMPO_INICIAL = 30;
 
@@ -21,25 +21,25 @@ export const ESTRATEGIAS_INICIO: EstrategiaInicio[] = [
     id: 'estilo-libre',
     tecnica: 'Estilo Libre',
     enfoque: 'Abierto / Creativo',
-    mecanica: 'Reacciona al título de forma orgánica e intuitiva, utilizando cualquier recurso (físico, verbal, relacional o espacial) sin restricciones de método.',
-    pensamiento: 'Pensamiento asociativo y espontáneo: juego libre sin filtros técnicos.',
-    idealPara: 'Cualquier formato, calentamientos, alumnos principiantes o exploración sin presión estructural.',
-    criterioExito: 'Construcción de plataforma clara y jugable.',
-    ejemplo: 'Título: "El último tren a París". El alumno reacciona libremente sentándose en el suelo mientras imita el traqueteo de un vagón y mira por una ventana imaginaria, o bien arranca directamente de pie diciendo: "¡Señor, espere! ¡Sé que las puertas ya están cerradas, pero mi vida entera va en ese vagón!".',
+    mecanica: 'Reacciona al tÃ­tulo de forma orgÃ¡nica e intuitiva, utilizando cualquier recurso (fÃ­sico, verbal, relacional o espacial) sin restricciones de mÃ©todo.',
+    pensamiento: 'Pensamiento asociativo y espontÃ¡neo: juego libre sin filtros tÃ©cnicos.',
+    idealPara: 'Cualquier formato, calentamientos, alumnos principiantes o exploraciÃ³n sin presiÃ³n estructural.',
+    criterioExito: 'ConstrucciÃ³n de plataforma clara y jugable.',
+    ejemplo: 'Descripcion generica sin tema concreto: aplica la tecnica mediante una accion escenica visible, una relacion jugable y una decision clara de personaje.',
     indicadoresLogro:
-      'Establece en los primeros segundos una base sólida para la escena (quién es, dónde está y qué le pasa) y acepta el estímulo del título de forma honesta y utilizable para el compañero.',
+      'Establece en los primeros segundos una base sÃ³lida para la escena (quiÃ©n es, dÃ³nde estÃ¡ y quÃ© le pasa) y acepta el estÃ­mulo del tÃ­tulo de forma honesta y utilizable para el compaÃ±ero.',
     lucesRojas:
-      'Se queda bloqueado por exceso de libertad (parálisis), ignora por completo el título propuesto, o genera una propuesta caótica que no construye ninguna situación dramática.',
+      'Se queda bloqueado por exceso de libertad (parÃ¡lisis), ignora por completo el tÃ­tulo propuesto, o genera una propuesta caÃ³tica que no construye ninguna situaciÃ³n dramÃ¡tica.',
   },
   {
     id: 'asociaciones-satelite',
     tecnica: 'Asociaciones Satelite',
     enfoque: 'Narrativo',
-    mecanica: 'Antes de decir la primera palabra, mentalmente (o en un segundo si estás en el escenario), desglosa el título en tres palabras clave relacionadas.',
+    mecanica: 'Antes de decir la primera palabra, mentalmente (o en un segundo si estÃ¡s en el escenario), desglosa el tÃ­tulo en tres palabras clave relacionadas.',
     pensamiento: 'Pensamiento lateral: evita la obviedad.',
     idealPara: 'Formatos largos, drama y misterio.',
     criterioExito: 'Originalidad periferica y coherence.',
-    ejemplo: 'Título: "El último tren a París". Satélites: frío, billete perdido, humo. El alumno camina frotándose los brazos, busca desesperadamente en sus bolsillos, saca las manos vacías y dice: "No puede ser... tiene que estar aquí...".',
+    ejemplo: 'Descripcion generica sin tema concreto: aplica la tecnica mediante una accion escenica visible, una relacion jugable y una decision clara de personaje.',
     indicadoresLogro:
       'Arranca con un elemento indirecto pero conectado al universo del titulo. Evita nombrar el titulo de golpe.',
     lucesRojas:
@@ -49,11 +49,11 @@ export const ESTRATEGIAS_INICIO: EstrategiaInicio[] = [
     id: 'disparador-primera-linea',
     tecnica: 'Disparador Primera Linea',
     enfoque: 'Narrativo',
-    mecanica: 'Utiliza el título para justificar una primera frase impactante que rompa la expectativa.',
+    mecanica: 'Utiliza el tÃ­tulo para justificar una primera frase impactante que rompa la expectativa.',
     pensamiento: 'Pensamiento verbal e ingenio: crea premisas rapidas.',
     idealPara: 'Comedia, sketches y formatos de juego corto.',
     criterioExito: 'Impacto y justificacion del contexto.',
-    ejemplo: 'Título: "Un paraguas bajo el sol". El alumno entra protegiéndose la cabeza con las manos, mira a su compañero con pánico y le dice: "¡Rápido, entra aquí! Dicen que si te da un rayo ultravioleta directo hoy, te derrites los sesos en tres segundos".',
+    ejemplo: 'Descripcion generica sin tema concreto: aplica la tecnica mediante una accion escenica visible, una relacion jugable y una decision clara de personaje.',
     indicadoresLogro:
       'La primera frase engancha al publico, rompe la expectativa obvia y plantea una premisa clara para la escena.',
     lucesRojas:
@@ -67,7 +67,7 @@ export const ESTRATEGIAS_INICIO: EstrategiaInicio[] = [
     pensamiento: 'Pensamiento espacial y kinestesico: baja la ansiedad cerebral.',
     idealPara: 'Teatro gestual, drama y escenas costumbristas.',
     criterioExito: 'Mimo, precision y peso dramatico.',
-    ejemplo: 'Título: "La última carta". El alumno se sienta en silencio, sostiene con extremo cuidado un papel invisible, pasa el dedo por el borde del sobre, lo desdobla despacio y arruga el papel contra su pecho con una respiración cortada.',
+    ejemplo: 'Descripcion generica sin tema concreto: aplica la tecnica mediante una accion escenica visible, una relacion jugable y una decision clara de personaje.',
     indicadoresLogro:
       'El objeto invisible tiene volumen, peso y consistencia fisica. Se toma tiempo para que el publico lo vea antes de hablar.',
     lucesRojas:
@@ -81,7 +81,7 @@ export const ESTRATEGIAS_INICIO: EstrategiaInicio[] = [
     pensamiento: 'Pensamiento emocional y fisico: el cuerpo lidera la mente.',
     idealPara: 'Creacion de personajes e improvisacion de estilo.',
     criterioExito: 'Compromiso corporal y estatus.',
-    ejemplo: 'Título: "La deuda". El alumno arranca de pie con rodillas flexionadas, hombros hundidos y barbilla pegada al pecho como si cargara un gran peso. Camina arrastrando los pies y mira a su compañero de reojo desde una sumisión absoluta.',
+    ejemplo: 'Descripcion generica sin tema concreto: aplica la tecnica mediante una accion escenica visible, una relacion jugable y una decision clara de personaje.',
     indicadoresLogro:
       'La energia y la postura del cuerpo entero sostienen la atmosfera del titulo antes, durante y despues de la primera palabra.',
     lucesRojas:
@@ -91,11 +91,11 @@ export const ESTRATEGIAS_INICIO: EstrategiaInicio[] = [
     id: 'zoom-in',
     tecnica: 'El Zoom In',
     enfoque: 'Atmosfera',
-    mecanica: 'Empieza describiendo el entorno que sugiere el título como si fueras un narrador o un personaje que observa el espacio.',
+    mecanica: 'Empieza describiendo el entorno que sugiere el tÃ­tulo como si fueras un narrador o un personaje que observa el espacio.',
     pensamiento: 'Pensamiento descriptivo y visual: pinta la escena.',
     idealPara: 'Monologos de inicio, escenas intimas y realismo magico.',
     criterioExito: 'Capacidad descriptiva e imaginaria.',
-    ejemplo: 'Título: "Secretos en el ático". El alumno entra observando el espacio e interactuando con él mientras dice: "Hacía diez años que nadie subía aquí... Mirad esa esquina, la tela de araña parece una cortina. Y este olor a madera vieja...".',
+    ejemplo: 'Descripcion generica sin tema concreto: aplica la tecnica mediante una accion escenica visible, una relacion jugable y una decision clara de personaje.',
     indicadoresLogro:
       'Pinta el espacio con palabras y detalles sensoriales, transportando al espectador antes de meter el conflicto.',
     lucesRojas:
@@ -105,11 +105,11 @@ export const ESTRATEGIAS_INICIO: EstrategiaInicio[] = [
     id: 'in-media-res',
     tecnica: 'In Media Res',
     enfoque: 'Atmosfera',
-    mecanica: 'Ignora la introducción. Imagina que el título es el clímax o la consecuencia de algo que ya pasó, y empieza con una discusión o una acción física ya iniciada.',
+    mecanica: 'Ignora la introducciÃ³n. Imagina que el tÃ­tulo es el clÃ­max o la consecuencia de algo que ya pasÃ³, y empieza con una discusiÃ³n o una acciÃ³n fÃ­sica ya iniciada.',
     pensamiento: 'Pensamiento reactivo e impulsivo: accion sin filtro.',
     idealPara: 'Escenas de alta energia, discusiones comicas y accion.',
     criterioExito: 'Manejo del ritmo y de la urgencia.',
-    ejemplo: 'Título: "Cenizas en el café". El alumno entra pegando un bufido, aparta una silla de un golpe, señala una taza imaginaria con rabia y grita: "¡Te juro que esta es la última vez que me haces el desayuno! ¡¿Qué es esto negro que flota?!"',
+    ejemplo: 'Descripcion generica sin tema concreto: aplica la tecnica mediante una accion escenica visible, una relacion jugable y una decision clara de personaje.',
     indicadoresLogro:
       'Entra con la accion fisica o el conflicto en su punto algido. El companero puede reaccionar de inmediato.',
     lucesRojas:
@@ -119,11 +119,11 @@ export const ESTRATEGIAS_INICIO: EstrategiaInicio[] = [
     id: 'efecto-mariposa',
     tecnica: 'Efecto Mariposa',
     enfoque: 'Estructural',
-    mecanica: 'Toma el título como el resultado final de una larga cadena de eventos. Tu improvisación no empieza en el título, sino en el primer eslabón que llevará inevitablemente a él.',
+    mecanica: 'Toma el tÃ­tulo como el resultado final de una larga cadena de eventos. Tu improvisaciÃ³n no empieza en el tÃ­tulo, sino en el primer eslabÃ³n que llevarÃ¡ inevitablemente a Ã©l.',
     pensamiento: 'Pensamiento causal: construccion de plataformas solidas.',
     idealPara: 'Tragedia, comedia de enredo e historias lineales.',
     criterioExito: 'Construccion de tension y progresion.',
-    ejemplo: 'Título: "El jarrón roto". El alumno entra silbando de forma relajada. Saca un balón invisible y empieza a darle toques con el pie dentro de la habitación, haciéndolos cada vez más altos y difíciles justo al lado de una mesa.',
+    ejemplo: 'Descripcion generica sin tema concreto: aplica la tecnica mediante una accion escenica visible, una relacion jugable y una decision clara de personaje.',
     indicadoresLogro:
       'Empieza desde la normalidad and realiza acciones cotidianas que el publico asocia logicamente con el desencadenante del titulo.',
     lucesRojas:
@@ -133,11 +133,11 @@ export const ESTRATEGIAS_INICIO: EstrategiaInicio[] = [
     id: 'flashforward',
     tecnica: 'Flashforward',
     enfoque: 'Estructural',
-    mecanica: 'Empieza mostrando la consecuencia directa del título y luego avanza desde ahí o haz un viaje al pasado.',
+    mecanica: 'Empieza mostrando la consecuencia directa del tÃ­tulo y luego avanza desde ahÃ­ o haz un viaje al pasado.',
     pensamiento: 'Pensamiento resignado y reflexivo: sostener el despues.',
     idealPara: 'Dramas profundos, escenas poeticas o de cierre.',
     criterioExito: 'Sostenimiento de la consecuencia.',
-    ejemplo: 'Título: "El último aplauso". El alumno se para en el centro, mira al horizonte con una sonrisa nostálgica, cruza los brazos y dice: "Bueno... pues ya está. Ya han apagado las luces de los palcos. Mañana este teatro será un supermercado...".',
+    ejemplo: 'Descripcion generica sin tema concreto: aplica la tecnica mediante una accion escenica visible, una relacion jugable y una decision clara de personaje.',
     indicadoresLogro:
       'Asume la carga emocional del despues y juega con la melancolia, el alivio o el shock de lo que ya paso.',
     lucesRojas:
@@ -151,7 +151,7 @@ export const ESTRATEGIAS_INICIO: EstrategiaInicio[] = [
     pensamiento: 'Pensamiento disruptivo: rompe el cliche al cien por cien.',
     idealPara: 'Humor absurdo, humor negro y comedia contemporanea.',
     criterioExito: 'Contrapunto emocional y verdad.',
-    ejemplo: 'Título: "El funeral del payaso". Dos alumnos entran saltando, chocando los cinco y riendo a carcajadas. Uno de ellos simula descorchar una botella de champán con alegría y grita: "¡Por fin se ha muerto! ¡Qué gran día, ponme una copa!"',
+    ejemplo: 'Descripcion generica sin tema concreto: aplica la tecnica mediante una accion escenica visible, una relacion jugable y una decision clara de personaje.',
     indicadoresLogro:
       'La emocion opuesta se juega con honestidad. La desconexion genera comedia o misterio genuino.',
     lucesRojas:
@@ -161,11 +161,11 @@ export const ESTRATEGIAS_INICIO: EstrategiaInicio[] = [
     id: 'subtexto-oculto',
     tecnica: 'Subtexto Oculto',
     enfoque: 'Psicologico',
-    mecanica: 'Utiliza el título como un secreto que tu personaje sabe, pero que no quiere revelar bajo ningún concepto. Toda tu improvisación consistirá en evitar hablar del título, aunque todo lo que hagas esté condicionado por él.',
+    mecanica: 'Utiliza el tÃ­tulo como un secreto que tu personaje sabe, pero que no quiere revelar bajo ningÃºn concepto. Toda tu improvisaciÃ³n consistirÃ¡ en evitar hablar del tÃ­tulo, aunque todo lo que hagas estÃ© condicionado por Ã©l.',
     pensamiento: 'Pensamiento estrategico: doble lectura y mascara.',
     idealPara: 'Suspense, drama psicologico e improvisacion estilo Chejov o Pinter.',
     criterioExito: 'Tension interna y juego de mascara.',
-    ejemplo: 'Título: "La carta de despido". El alumno entra a casa con una sonrisa exagerada y forzada. Saluda a su pareja con entusiasmo desmedido: "¡Cariño! ¡Feliz martes! Te he traído tus bombones favoritos y he reservado un viaje carísimo...". Su mirada refleja pánico.',
+    ejemplo: 'Descripcion generica sin tema concreto: aplica la tecnica mediante una accion escenica visible, una relacion jugable y una decision clara de personaje.',
     indicadoresLogro:
       'El alumno suda el secreto. Sus acciones intentan tapar el titulo, pero sus ojos y lenguaje corporal lo delatan.',
     lucesRojas:
@@ -179,7 +179,7 @@ export const ESTRATEGIAS_INICIO: EstrategiaInicio[] = [
     pensamiento: 'Pensamiento logico-absurdo: crea realidades paralelas.',
     idealPara: 'Estilos surrealistas, comic y realismo sucio.',
     criterioExito: 'Aceptacion del codigo absurdo.',
-    ejemplo: 'Título: "Se me cae la casa encima". El alumno empieza agachado, con las manos firmes hacia arriba sosteniendo un techo invisible imaginario que pesa toneladas y grita: "¡Juan, ven aquí! ¡Te dije que las vigas cedían y ya tengo el pladur en las orejas!"',
+    ejemplo: 'Descripcion generica sin tema concreto: aplica la tecnica mediante una accion escenica visible, una relacion jugable y una decision clara de personaje.',
     indicadoresLogro:
       'Trata la metafora fisica con naturalidad dentro de la logica del personaje. El entorno reacciona a esa literalidad.',
     lucesRojas:
@@ -189,11 +189,11 @@ export const ESTRATEGIAS_INICIO: EstrategiaInicio[] = [
     id: 'ritmo-onomatopeya',
     tecnica: 'Ritmo y Onomatopeya',
     enfoque: 'Conceptual',
-    mecanica: 'A veces los títulos tienen una musicalidad. Olvídate del significado de las palabras y concéntrate en su sonido. Empieza la escena repitiendo ese ritmo con un sonido, un tic físico o una tarea repetitiva.',
+    mecanica: 'A veces los tÃ­tulos tienen una musicalidad. OlvÃ­date del significado de las palabras y concÃ©ntrate en su sonido. Empieza la escena repitiendo ese ritmo con un sonido, un tic fÃ­sico o una tarea repetitiva.',
     pensamiento: 'Pensamiento musical y abstracto: desconecta el texto.',
     idealPara: 'Improvisacion musical, danza-teatro y formatos experimentales.',
     criterioExito: 'Musicalidad y permanencia del patron.',
-    ejemplo: 'Título: "Tic-Tac, mecánico". El alumno no habla; camina en líneas rectas y ángulos de 90 grados. Cada tres pasos hace un chasquido seco con la lengua ("¡clac!") y gira la cabeza bruscamente a un lado mientras limpia rítmicamente una mesa invisible.',
+    ejemplo: 'Descripcion generica sin tema concreto: aplica la tecnica mediante una accion escenica visible, una relacion jugable y una decision clara de personaje.',
     indicadoresLogro:
       'Se deja contagiar por el tempo del titulo y mantiene ese patron ritmico en su habla o cuerpo como motor.',
     lucesRojas:

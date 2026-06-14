@@ -19,10 +19,10 @@ ${params.tipoFinal.tecnica}: ${params.tipoFinal.enfoque}
 - Extrae la imagen central del titulo y conviertela en el motor de la escena.
 - Si el titulo contiene un lugar concreto, ese lugar debe aparecer en el planteamiento o el nudo.
 - Si el titulo contiene una pregunta, el planteamiento debe convertir esa pregunta en un problema activo.
-- Reutiliza la rareza central del titulo, no solo un lugar secundario. En "pagar por respirar en el metro", respirar y pagar deben mover la escena.
+- Reutiliza la rareza central del titulo, no solo un elemento secundario.
 - Reutiliza al menos dos palabras significativas del titulo cuando sea posible, sin contar articulos ni conectores.
-- No cambies a un universo generico no relacionado. Prohibido sustituir el titulo por conflictos de farmacia, contratos, alquileres o familiares si no aparecen en el titulo.
-- No inventes conflictos de contratos, deudas, herencias o alquileres salvo que el titulo los sugiera directamente.
+- No cambies a un universo generico no relacionado.
+- No inventes conflictos ajenos al titulo salvo que el propio titulo los sugiera directamente.
 
 [REGLAS DEL PLANTEAMIENTO]
 - Idealmente 18 a 30 palabras; puedes llegar a 38 si hace falta para cerrar la frase con sentido.
@@ -43,7 +43,7 @@ ${params.tipoFinal.tecnica}: ${params.tipoFinal.enfoque}
 - "planteamiento" y "nudo" deben tener entre 18 y 38 palabras cada uno.
 - No uses 2 o 3 frases. No hagas sinopsis larga. No incluyas antecedentes.
 - Nunca termines una frase a medias ni con palabras colgantes como "de", "por", "para", "con", "su" o "sus".
-- Prefiere nombres comunes y acciones claras: "dos hermanas", "en una farmacia", "el contrato desaparece".
+- Prefiere roles claros, relaciones comprensibles, espacios concretos y acciones visibles.
 
 [FORMATO DE SALIDA ESTRICTO]
 Devuelve EXCLUSIVAMENTE un objeto JSON valido:

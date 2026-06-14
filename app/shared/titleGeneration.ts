@@ -1,30 +1,62 @@
-import { OpenAI } from 'openai';
+﻿import { OpenAI } from 'openai';
 import { crearAvisoVariedadTitulos, tituloSePareceAHistorial } from './titleSimilarity';
 
-const INTENTOS_TITULO = 6;
+const INTENTOS_TITULO = 10;
+const MAX_TITULOS_HISTORIAL_PROMPT = 6;
 
-const TITULOS_FALLBACK = [
-  'La impresora exige vacaciones',
-  'Prohibido llorar en el coworking',
-  'El ascensor cobra entrada',
-  'La sopa pidio abogado',
-  'Hacienda reclama al fantasma',
-  'El semaforo dirige la boda',
-  'Hoy no funciona la realidad',
-  'La farmacia vende disculpas',
-  'El taxi sabe demasiado',
-  'La tarta cancelo el cumpleanos',
-  'El banco perdono al cajero',
-  'La nevera pide testigos',
-  'Silencio en la sala dos',
-  'El examen denuncio al profesor',
-  'La alarma exige aplausos',
-  'El menu eligio presidente',
-  '¿Esto entra en la garantia?',
-  'Devuelve el aplauso ahora mismo',
-  'La reunion pudo ser un audio',
-  'Nadie aviso al pianista',
+const FORMAS_SINTACTICAS = [
+  'pregunta',
+  'orden',
+  'aviso',
+  'titular',
+  'queja',
+  'rumor',
+  'frase oida al pasar',
+  'cartel',
+  'consigna',
+  'enunciado absurdo',
 ];
+
+const CIERRES_GRAMATICALES_DEBILES = new Set([
+  'a',
+  'al',
+  'ante',
+  'bajo',
+  'con',
+  'contra',
+  'de',
+  'del',
+  'desde',
+  'el',
+  'en',
+  'entre',
+  'hacia',
+  'hasta',
+  'la',
+  'las',
+  'lo',
+  'los',
+  'mi',
+  'mis',
+  'para',
+  'por',
+  'que',
+  'se',
+  'sin',
+  'sobre',
+  'su',
+  'sus',
+  'tras',
+  'tu',
+  'tus',
+  'un',
+  'una',
+  'ya',
+]);
+
+function elegirFormaSintactica(): string {
+  return FORMAS_SINTACTICAS[Math.floor(Math.random() * FORMAS_SINTACTICAS.length)];
+}
 
 function crearClienteGroq(): OpenAI {
   const apiKey = process.env.NEXT_PUBLIC_API_KEY;
@@ -60,108 +92,42 @@ function crearGuiaDificultadTitulo(dificultad: string): string {
   const dificultadNormalizada = normalizarDificultad(dificultad);
 
   if (dificultadNormalizada === 'facil') {
-    return `FACIL: locura cotidiana y jugable.
-- Debe partir de una situacion reconocible: casa, familia, trabajo, compra, colegio, medico, restaurante, transporte, tramite o celebracion.
-- La rareza debe ser pequena y facil de actuar: una orden absurda, un malentendido claro, un objeto fuera de lugar, una norma ridicula o una frase escuchada en un sitio comun.
-- Evita amenazas cosmicas, conspiraciones, leyes imposibles o tecnologia rara.
-- Salida invalida: El universo exige explicaciones.
-- Salida invalida: Mi vecino es un vampiro.
-- Salida valida: Prohibido cantar en la farmacia.`;
+    return 'Cotidiano, concreto y facil de actuar. Rareza pequena, no cosmica.';
   }
 
   if (dificultadNormalizada === 'media') {
-    return `MEDIA: caos social con secreto incomodo.
-- Puede incluir una revelacion, sospecha, acusacion, pregunta inquietante, titular absurdo o regla social imposible.
-- La escena debe sonar a frase de publico real, cartel raro, noticia local, queja de barrio o comentario oido al pasar.
-- Puede haber exageracion, pero el conflicto debe entenderse al instante.
-- Salida invalida: Me despiertan a medianoche.
-- Salida invalida: Mi amigo es el alcalde.
-- Salida valida: El ayuntamiento multa los bostezos.`;
+    return 'Caos social claro. Puede haber sospecha, regla rara, queja o aviso. Debe entenderse rapido.';
   }
 
-  return `DIFICIL: absurdo extremo pero concreto.
-- Debe mezclar un lugar, objeto, tramite cotidiano, tendencia actual o institucion reconocible con una consecuencia imposible.
-- La locura debe ser clara y actuable: burocracia absurda, autoridad ridicula, objeto con poder social, norma imposible, tecnologia cotidiana fuera de control o ritual social exagerado.
-- Prohibido quedarse en misterio generico: medianoche, alarma, sombra, secreto, destino o sueno no bastan por si solos.
-- Prohibido inventar palabras, nombres falsos o terminos que no existan en espanol.
-- Salida invalida: Me despiertan a medianoche.
-- Salida invalida: Me despierta el leder de la alarma.
-- Salida invalida: Mi madre es una aplicacion.
-- Salida valida: La nube exige certificado medico.`;
+  return 'Absurdo extremo pero escenico y concreto. Sin misterio generico ni palabras inventadas.';
 }
 
 function crearPromptTitulo(dificultad: string, titulos: string[]): string {
-  const historialTitulos = titulos.length > 0 ? titulos.join(', ') : 'Ninguno todavia';
-  const avisoVariedad = crearAvisoVariedadTitulos(titulos);
+  const historialReciente = titulos.slice(-MAX_TITULOS_HISTORIAL_PROMPT);
+  const historialTitulos = historialReciente.length > 0 ? historialReciente.join(' | ') : 'ninguno';
+  const avisoVariedad = crearAvisoVariedadTitulos(historialReciente);
   const dificultadNormalizada = normalizarDificultad(dificultad).toUpperCase();
+  const formaSintactica = elegirFormaSintactica();
 
-  return `
-[ROL]
-Eres un espectador real, gamberro, divertido y muy espontaneo en un show de comedia de improvisacion teatral. Estas entre el publico y gritas una frase ingeniosa para que los actores arranquen su escena desde una situacion estimulante.
-
-[MISION]
-Inventa una frase inicial o titulo unico de exactamente entre 4 y 7 palabras en espanol.
-
-[REGLA CRITICA DE ORTOGRAFIA Y GRAMATICA]
-- Queda estrictamente PROHIBIDO inventar palabras o cometer errores de conjugacion. Asegurate de que todos los verbos irregulares esten perfectamente conjugados en espanol real y correcto.
-- Usa solo palabras comunes del espanol. Nada de spanglish, nombres inventados, marcas falsas ni terminos deformados.
-- La frase debe entenderse en una lectura rapida. Puede ser pregunta, orden, cartel, titular, queja, frase oida al pasar, situacion abierta o enunciado absurdo.
-
-[REGLAS DE ORO PARA EL TONO]
-1. PROHIBIDO EL TONO POETICO O METAFORICO: Evita frases filosoficas abstractas. Nadie grita poesia en un show de impro.
-2. FRASES DE PUBLICO REAL: Debe sonar a algo que alguien gritaria desde la butaca: una noticia rara, una norma absurda, un cartel, una pregunta, una orden, una queja, un rumor o una frase interrumpida.
-3. VARIEDAD SINTACTICA OBLIGATORIA: Alterna entre preguntas, imperativos, titulares, frases nominales, carteles, lugares publicos, actualidad ligera y objetos con comportamiento social.
-4. Evita por defecto las plantillas personales tipo "mi amigo es", "mi vecino es", "mi madre es", "mi jefe es", "mi pareja es". Solo usa posesivos personales si la idea es realmente inesperada y no define el conflicto de forma obvia.
-
-[BANCO DE FORMAS NATURALES]
-- Pregunta de publico: ¿Esto entra en la garantia?
-- Orden o advertencia: No abras esa nevera
-- Cartel o norma absurda: Prohibido llorar en el coworking
-- Titular local: El ayuntamiento multa los bostezos
-- Frase oida al pasar: Eso no era parte del trato
-- Situacion abierta: Tres sillas y una disculpa
-- Actualidad cotidiana: La reunion pudo ser un audio
-- Objeto con vida social: La farmacia vende paciencia
-
-[EVITAR REPETICION]
-- Historial de titulos ya jugados: [${historialTitulos}]
-- La nueva frase debe alejarse claramente de todos los titulos del historial.
-- No repitas conceptos, entornos, objetos, roles, relaciones, conflictos ni palabras clave del historial.
-- No generes una variante, sinonimo, inversion de palabras o giro parecido de un titulo anterior.
-- ${avisoVariedad}
-- Si una palabra aparece en la lista de palabras ya gastadas, evita tambien su masculino, femenino, plural, diminutivo, aumentativo y sinonimos obvios.
-- Si un tema aparece en la lista de temas ya gastados, elige otro universo dramatico aunque las palabras exactas sean distintas.
-
-[FILTRO DE CONTENIDO]
-Nada de dramas oscuros, tragedias ni infidelidades serias. Buscamos comedia de enredos, situaciones ridiculas y juego limpio.
-
-[MECANISMO DE INSPIRACION POR NIVEL: ${dificultadNormalizada}]
-${crearGuiaDificultadTitulo(dificultad)}
-
-[CONTROL DE CALIDAD FINAL]
-Revisa que las palabras existan, esten bien escritas y suenen naturales. Debe tener entre 4 y 7 palabras.
-Antes de responder, descarta mentalmente cualquier frase que:
-- Parezca un titulo generico de pelicula.
-- Sea solo una situacion normal sin giro comico.
-- Contenga una palabra dudosa o inventada.
-- Use Mayusculas En Cada Palabra.
-- Empiece con una plantilla obvia de relacion personal: "Mi amigo...", "Mi vecino...", "Mi madre...", "Mi jefe...", "Mi pareja...".
-- Defina demasiado claramente los personajes y el conflicto como si fuera una sinopsis cerrada.
-- Se parezca en tema, situacion, rol, objeto, conflicto o vocabulario a cualquier titulo del historial.
-
-[FORMATO DE SALIDA CRITICO]
-Devuelve UNICAMENTE las palabras de la frase final.
-- Usa mayuscula solo al inicio de la frase o en nombres propios reales.
-- Prohibido usar comillas de cualquier tipo.
-- Prohibido usar parentesis, corchetes, asteriscos o notas escenicas.
-- Prohibido escribir introducciones como "Aqui tienes", "Titulo:", "Frase:" o similares.
-- Prohibido explicar tu decision, describir tu pensamiento o anadir comentarios metalinguisticos.
-- Salida invalida: "La noche susurra secretos" (suena poetico y generico)
-- Salida invalida: Mi vecino compra mi mascota
-- Salida invalida: Mi amigo es el presidente
-- Salida valida: ¿Esto entra en la garantia?
-
-Frase final:`;
+  return `Genera UN titulo de impro en espanol.
+Forma obligatoria: ${formaSintactica}.
+Dificultad ${dificultadNormalizada}: ${crearGuiaDificultadTitulo(dificultad)}
+Reglas:
+- 4 a 7 palabras.
+- Unidad gramatical con sentido real.
+- Concordancia obligatoria entre sujeto, verbo, genero y numero.
+- Comedia jugable, concreta, no poetica.
+- Espanol natural y oral: una persona podria decirlo en voz alta sin que suene roto.
+- Sin palabras inventadas, deformadas, truncadas, siglas, abreviaturas con puntos, spanglish, markdown, comillas, parentesis ni explicaciones.
+- Prohibido cerrar con cuantificadores mal encajados o muletillas que rompan la frase.
+- No fuerces la forma obligatoria si eso rompe la gramatica: prioriza una frase correcta y comprensible.
+- Solo mayuscula inicial o nombres propios.
+- No termines con palabra colgante.
+- Evita plantillas posesivas obvias.
+- No repitas titulos, palabras clave ni estructura reciente.
+Historial reciente: ${historialTitulos}.
+${avisoVariedad}
+Respuesta:`;
 }
 
 function tituloUsaPlantillaPersonalObvia(titulo: string): boolean {
@@ -169,12 +135,87 @@ function tituloUsaPlantillaPersonalObvia(titulo: string): boolean {
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[¿?¡!.,;:]/g, '')
+    .replace(/[Â¿?Â¡!.,;:]/g, '')
     .replace(/\s+/g, ' ')
     .trim();
 
-  return /^(mi|tu|su|nuestro|nuestra) (amigo|amiga|vecino|vecina|madre|padre|jefe|jefa|pareja|novio|novia)\b/.test(
+  return /^(mi|mis|tu|tus|su|sus|nuestro|nuestra|nuestros|nuestras)\s+\S+\s+(es|son|era|eran|esta|estan|tiene|tienen|quiere|quieren|compra|compran|vende|venden|odia|odian)\b/.test(
     normalizado,
+  );
+}
+
+function normalizarTituloParaValidacion(titulo: string): string {
+  return titulo
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[¿?¡!.,;:]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function extraerPalabrasTitulo(titulo: string): string[] {
+  return normalizarTituloParaValidacion(titulo).split(' ').filter(Boolean);
+}
+
+function tituloEstaEnMayusculas(titulo: string): boolean {
+  const letras = titulo
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-ZñÑ]/g, '');
+
+  return letras.length >= 4 && letras === letras.toUpperCase() && letras !== letras.toLowerCase();
+}
+
+function tituloTieneRepeticionTorpe(palabras: string[]): boolean {
+  return palabras.some((palabra, index) => index > 0 && palabra === palabras[index - 1]);
+}
+
+function tituloTieneFormatoRoto(titulo: string): boolean {
+  return /(?:\b[\p{L}]\.){2,}/u.test(titulo) || /[\p{Ll}][\p{Lu}]/u.test(titulo);
+}
+
+function tituloTieneConcordanciaRota(titulo: string): boolean {
+  const normalizado = normalizarTituloParaValidacion(titulo);
+
+  return /\b(el|la|los|las)\s+\S+\s+se\s+(ha|han)\s+\S+(ado|ido|to|so|cho)\s+tod[oa]s?\b/.test(normalizado);
+}
+
+function tituloTieneSentidoBasico(titulo: string): boolean {
+  const palabras = extraerPalabrasTitulo(titulo);
+  const ultimaPalabra = palabras[palabras.length - 1];
+
+  if (palabras.length < 4 || palabras.length > 7) {
+    return false;
+  }
+
+  if (!ultimaPalabra || CIERRES_GRAMATICALES_DEBILES.has(ultimaPalabra)) {
+    return false;
+  }
+
+  if (tituloTieneRepeticionTorpe(palabras) || tituloTieneFormatoRoto(titulo) || tituloTieneConcordanciaRota(titulo)) {
+    return false;
+  }
+
+  return true;
+}
+
+function normalizarMayusculasTitulo(titulo: string): string {
+  if (!tituloEstaEnMayusculas(titulo)) {
+    return titulo;
+  }
+
+  const tituloMinusculas = titulo.toLocaleLowerCase('es-ES');
+  const indicePrimeraLetra = tituloMinusculas.search(/\p{L}/u);
+
+  if (indicePrimeraLetra === -1) {
+    return tituloMinusculas;
+  }
+
+  return (
+    tituloMinusculas.slice(0, indicePrimeraLetra) +
+    tituloMinusculas.charAt(indicePrimeraLetra).toLocaleUpperCase('es-ES') +
+    tituloMinusculas.slice(indicePrimeraLetra + 1)
   );
 }
 
@@ -191,24 +232,26 @@ function limpiarTituloGenerado(textoCrudo: string): string {
 
   return sinPrefijo
     .replace(/\s*[\(\[\{][^\)\]\}]*[\)\]\}]\s*/g, ' ')
-    .replace(/["'`“”‘’«»]/g, '')
-    .replace(/[.。]+$/g, '')
+    .replace(/[*_~]+/g, '')
+    .replace(/["'`â€œâ€â€˜â€™Â«Â»]/g, '')
+    .replace(/[.ã€‚]+$/g, '')
     .replace(/\s+/g, ' ')
-    .trim();
+    .trim()
+    .replace(/^(.+)$/, normalizarMayusculasTitulo);
 }
 
 function getTemperaturaTitulo(dificultad: string): number {
   const dificultadNormalizada = normalizarDificultad(dificultad);
 
   if (dificultadNormalizada === 'facil') {
-    return 0.6;
+    return 0.85;
   }
 
   if (dificultadNormalizada === 'media') {
-    return 0.8;
+    return 1.0;
   }
 
-  return 0.95;
+  return 1.1;
 }
 
 export async function generarTituloComun(dificultad: string, titulos: string[]): Promise<string> {
@@ -222,7 +265,9 @@ export async function generarTituloComun(dificultad: string, titulos: string[]):
       model: 'llama-3.1-8b-instant',
       messages: [{ role: 'user', content: crearPromptTitulo(dificultad, historialParaPrompt) }],
       temperature: Math.min(getTemperaturaTitulo(dificultad) + intento * 0.15, 1.2),
-      max_tokens: 40,
+      presence_penalty: 0.7,
+      frequency_penalty: 0.5,
+      max_tokens: 20,
     });
 
     const titulo = limpiarTituloGenerado(response.choices[0]?.message?.content?.trim() || '');
@@ -231,16 +276,24 @@ export async function generarTituloComun(dificultad: string, titulos: string[]):
       continue;
     }
 
-    mejorTitulo = mejorTitulo || titulo;
+    if (!mejorTitulo && tituloTieneSentidoBasico(titulo)) {
+      mejorTitulo = titulo;
+    }
 
-    if (!tituloUsaPlantillaPersonalObvia(titulo) && !tituloSePareceAHistorial(titulo, titulos)) {
+    if (
+      tituloTieneSentidoBasico(titulo) &&
+      !tituloUsaPlantillaPersonalObvia(titulo) &&
+      !tituloSePareceAHistorial(titulo, titulos)
+    ) {
       return titulo;
     }
 
     rechazados.push(titulo);
   }
 
-  const fallback = TITULOS_FALLBACK.find((titulo) => !tituloSePareceAHistorial(titulo, titulos));
+  if (mejorTitulo) {
+    return mejorTitulo;
+  }
 
-  return fallback || mejorTitulo || 'Titulo Misterioso';
+  throw new Error('No se pudo generar un titulo valido: ' + rechazados.join(' | '));
 }

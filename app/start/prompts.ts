@@ -7,8 +7,6 @@ interface RubricaTecnica {
   indicadoresLogro: string;
   lucesRojas: string;
   decisionEvaluador: string;
-  ejemploInsuficiente: string;
-  ejemploSuficiente: string;
 }
 
 const RUBRICAS_TECNICAS: Record<string, RubricaTecnica> = {
@@ -21,9 +19,6 @@ const RUBRICAS_TECNICAS: Record<string, RubricaTecnica> = {
       'Se queda en una ocurrencia, una sinopsis, una frase bonita o una reaccion generica que no construye una situacion dramatica.',
     decisionEvaluador:
       'Para aprobar, debe haber una decision escenica clara y accionable. La libertad no permite vaguedad.',
-    ejemploInsuficiente: 'Esto va de una familia que tiene un problema muy raro.',
-    ejemploSuficiente:
-      'Entro a la cocina con una factura en la mano y le digo a mi hermana que papa ha vendido la nevera para pagar clases de magia.',
   },
   'asociaciones-satelite': {
     tecnica: 'Asociaciones Satelite',
@@ -34,10 +29,6 @@ const RUBRICAS_TECNICAS: Record<string, RubricaTecnica> = {
       'Cae en la literalidad absoluta o introduce un elemento tan inconexo que rompe el sentido del titulo.',
     decisionEvaluador:
       'Para aprobar, debe partir de un satelite reconocible: lugar, sensacion, consecuencia lateral, objeto secundario, ambiente o detalle periferico. Reutilizar el sujeto, accion o imagen central del titulo de forma directa debe suspender, aunque la introduccion sea completa.',
-    ejemploInsuficiente:
-      'Me quedo en casa de mi tio y descubro que tiene gatos en la cocina para cocinarlos.',
-    ejemploSuficiente:
-      'Entro contando monedas para pagar un vaso de agua, reviso cada bolsillo y acuso al guardarropa de oler a cuero nuevo.',
   },
   'disparador-primera-linea': {
     tecnica: 'Disparador Primera Linea',
@@ -48,9 +39,6 @@ const RUBRICAS_TECNICAS: Record<string, RubricaTecnica> = {
       'Dice una frase ingeniosa pero flotante que no construye plataforma ni da juego a su companero.',
     decisionEvaluador:
       'Para aprobar, debe aparecer una primera frase concreta de personaje y esa frase debe abrir relacion, premisa o conflicto inmediato.',
-    ejemploInsuficiente: 'Entraria enfadado y diria algo sorprendente sobre el titulo.',
-    ejemploSuficiente:
-      "Miro a mi hermano con la maleta abierta y digo: 'No metas al abuelo en la lavadora, esta vez va de copiloto'.",
   },
   'objeto-imaginario': {
     tecnica: 'Objeto Imaginario',
@@ -61,9 +49,6 @@ const RUBRICAS_TECNICAS: Record<string, RubricaTecnica> = {
       'El objeto desaparece magicamente a los dos segundos porque el alumno se pone a hablar y se olvida de su fisicidad.',
     decisionEvaluador:
       'Para aprobar, debe describir interaccion fisica precisa con un objeto o elemento invisible y al menos una cualidad fisica: peso, tamano, forma, textura, resistencia, distancia o volumen.',
-    ejemploInsuficiente: 'La vecina acusa a mi perro de comerse sus flores y se enfada conmigo.',
-    ejemploSuficiente:
-      'Abro la puerta sujetando una correa invisible que tira de mi brazo; recojo del suelo unas flores mordidas y las escondo detras de la espalda.',
   },
   'modificacion-postura': {
     tecnica: 'Modificacion de Postura',
@@ -74,9 +59,6 @@ const RUBRICAS_TECNICAS: Record<string, RubricaTecnica> = {
       'Solo cambia la cara o la voz, pero mantiene una postura corporal neutra o cotidiana.',
     decisionEvaluador:
       'Para aprobar, debe haber una decision corporal visible del cuerpo entero: columna, hombros, mirada, ritmo, peso, respiracion, altura, tension, avance o retirada.',
-    ejemploInsuficiente: 'Entro nervioso y discuto con mi jefe.',
-    ejemploSuficiente:
-      'Entro encogido, con hombros pegados a las orejas y mirada al suelo; avanzo dos pasos y retrocedo cada vez que mi jefa levanta la mano.',
   },
   'zoom-in': {
     tecnica: 'El Zoom In',
@@ -87,9 +69,6 @@ const RUBRICAS_TECNICAS: Record<string, RubricaTecnica> = {
       'Hace una descripcion aburrida tipo inventario o se alarga tanto describiendo que la escena no avanza.',
     decisionEvaluador:
       'Para aprobar, debe crear atmosfera espacial o sensorial concreta y despues conectar esa atmosfera con personajes, relacion y tension.',
-    ejemploInsuficiente: 'Estoy en una discoteca y discuto con el portero.',
-    ejemploSuficiente:
-      'La luz azul parpadea sobre el suelo pegajoso; hay pulseras rotas junto al guardarropa y el portero tapa con el pie una cartera de cuero.',
   },
   'in-media-res': {
     tecnica: 'In Media Res',
@@ -100,9 +79,6 @@ const RUBRICAS_TECNICAS: Record<string, RubricaTecnica> = {
       'Entra gritando sin un motivo claro, generando ruido pero no informacion dramatica utilizable.',
     decisionEvaluador:
       'Para aprobar, la escena debe empezar ya en mitad de una accion, discusion o consecuencia activa. No debe explicar antecedentes largos antes del conflicto.',
-    ejemploInsuficiente: 'Primero explico que ayer nos peleamos y despues empezamos a discutir.',
-    ejemploSuficiente:
-      "Entro sujetando la puerta con el hombro y grito: 'No abras la nevera, te dije que todavia esta negociando con mama'.",
   },
   'efecto-mariposa': {
     tecnica: 'Efecto Mariposa',
@@ -113,9 +89,6 @@ const RUBRICAS_TECNICAS: Record<string, RubricaTecnica> = {
       'Fuerza el accidente o el climax demasiado rapido en lugar de disfrutar del camino.',
     decisionEvaluador:
       'Para aprobar, debe empezar por un primer eslabon pequeno y cotidiano que pueda conducir logicamente al titulo como consecuencia final.',
-    ejemploInsuficiente: 'Empiezo con el jarron ya roto y todos gritando.',
-    ejemploSuficiente:
-      'Entro practicando patadas suaves con una pelota invisible mientras mi hermana estudia al lado de una mesa llena de porcelana.',
   },
   flashforward: {
     tecnica: 'Flashforward',
@@ -126,9 +99,6 @@ const RUBRICAS_TECNICAS: Record<string, RubricaTecnica> = {
       'Se queda sin ideas tras la primera frase y reinicia la escena volviendo al pasado de forma tosca.',
     decisionEvaluador:
       'Para aprobar, debe empezar en el despues: consecuencia, ruina, resaca emocional, juicio, limpieza, despedida o momento posterior al evento sugerido por el titulo.',
-    ejemploInsuficiente: 'Empiezo antes de la boda y veremos como acaba mal.',
-    ejemploSuficiente:
-      "Recojo arroz del suelo con la corbata rota y le digo a mi hermana: 'Nunca debimos dejar que el cura eligiera la musica'.",
   },
   'punto-vista-opuesto': {
     tecnica: 'Punto de Vista Opuesto',
@@ -139,9 +109,6 @@ const RUBRICAS_TECNICAS: Record<string, RubricaTecnica> = {
       'Se vuelve una parodia absurda donde el alumno se rie de su propia ocurrencia en lugar de vivir la escena.',
     decisionEvaluador:
       'Para aprobar, la emocion, actitud o valoracion debe ser claramente contraria a la esperada y debe sostenerse con verdad interna.',
-    ejemploInsuficiente: 'Me enfado porque me han despedido.',
-    ejemploSuficiente:
-      "Entro celebrando con cava y abrazo a mi pareja: 'Por fin me han despedido, ahora podre arruinar la empresa desde fuera'.",
   },
   'subtexto-oculto': {
     tecnica: 'Subtexto Oculto',
@@ -152,9 +119,6 @@ const RUBRICAS_TECNICAS: Record<string, RubricaTecnica> = {
       'El subtexto es tan oculto que ni el companero ni el publico se enteran de que esta pasando.',
     decisionEvaluador:
       'Para aprobar, debe haber doble capa: lo que el personaje dice en superficie y lo que intenta tapar por debajo. No debe confesar el secreto directamente al inicio.',
-    ejemploInsuficiente: 'Le digo a mi pareja que me han despedido y discutimos.',
-    ejemploSuficiente:
-      'Entro con una sonrisa enorme, escondo una carta arrugada en el bolsillo y ofrezco unas vacaciones carisimas mientras evito mirar el uniforme del trabajo.',
   },
   'metafora-literal': {
     tecnica: 'Metafora Literal',
@@ -165,9 +129,6 @@ const RUBRICAS_TECNICAS: Record<string, RubricaTecnica> = {
       'Lo juega como si fuera un chiste de mimica en lugar de una realidad fisica aplastante para el personaje.',
     decisionEvaluador:
       'Para aprobar, debe convertir una expresion figurada o abstracta del titulo en una realidad fisica concreta con reglas escenicas.',
-    ejemploInsuficiente: 'Digo que siento que el mundo se me cae encima porque estoy agobiado.',
-    ejemploSuficiente:
-      'Entro agachado sosteniendo un techo invisible que cruje y le suplico a mi hermano que saque primero la mesa antes de que el salon termine de caer.',
   },
   'ritmo-onomatopeya': {
     tecnica: 'Ritmo y Onomatopeya',
@@ -178,9 +139,6 @@ const RUBRICAS_TECNICAS: Record<string, RubricaTecnica> = {
       'El ritmo se diluye en cuanto el alumno empieza a pensar en el argumento o en el texto.',
     decisionEvaluador:
       'Para aprobar, debe aparecer un ritmo, sonido, repeticion, tic fisico, patron vocal o tarea repetitiva que se mantenga como motor escenico.',
-    ejemploInsuficiente: 'Hago tic tac una vez y luego cuento que estoy nervioso.',
-    ejemploSuficiente:
-      "Camino tres pasos secos, hago 'clac' con la lengua, giro la cabeza siempre al mismo lado y mi hermana intenta interrumpir ese patron porque despierta al bebe.",
   },
 };
 
@@ -202,8 +160,7 @@ function crearPruebaTecnicaEstrategia(estrategia: EstrategiaInicio): string {
 - Luces rojas / errores comunes: ${rubrica.lucesRojas}
 - Decision del evaluador: ${rubrica.decisionEvaluador}
 - Si aparece la luz roja o el criterio de exito no se cumple claramente, "aprobado" DEBE ser false aunque la introduccion escenica sea completa.
-- Ejemplo insuficiente: "${rubrica.ejemploInsuficiente}"
-- Ejemplo suficiente: "${rubrica.ejemploSuficiente}"`;
+`;
 }
 
 export function crearPromptDirectorInicio(params: {

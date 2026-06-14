@@ -35,19 +35,6 @@ const PALABRAS_VACIAS_LITERALIDAD = new Set([
   'y',
 ]);
 
-const GRUPOS_SINONIMOS_LITERALIDAD = [
-  ['billetera', 'cartera', 'monedero'],
-  ['ayer', 'anoche', 'noche', 'anterior'],
-  ['robar', 'robo', 'robaron', 'robado', 'ladron'],
-  ['mujer', 'esposa', 'femenina', 'femenino'],
-  ['vestir', 'viste', 'vestido', 'ropa', 'disfraz'],
-  ['cocina', 'cocinar', 'cocinado', 'cocinados', 'olla', 'sarten'],
-  ['gato', 'gatos', 'felino', 'felinos'],
-  ['perro', 'perros', 'can', 'mascota'],
-  ['vecino', 'vecina', 'vecinos', 'vecinas'],
-  ['tio', 'tia', 'familiar'],
-];
-
 function crearClienteGroq(): OpenAI {
   const apiKey = process.env.NEXT_PUBLIC_API_KEY;
 
@@ -139,21 +126,6 @@ function compartenRaiz(a: string, b: string): boolean {
   return longitud >= 5 && a.slice(0, 5) === b.slice(0, 5);
 }
 
-function estanEnMismoGrupoSemantico(a: string, terminosPropuesta: Set<string>): boolean {
-  return GRUPOS_SINONIMOS_LITERALIDAD.some((grupo) => {
-    const grupoNormalizado = grupo.map(raizComparacion);
-    const contieneTitulo = grupoNormalizado.some((termino) => compartenRaiz(a, termino));
-
-    if (!contieneTitulo) {
-      return false;
-    }
-
-    return grupoNormalizado.some((termino) =>
-      [...terminosPropuesta].some((terminoPropuesta) => compartenRaiz(termino, terminoPropuesta)),
-    );
-  });
-}
-
 function propuestaEsLiteralParaAsociacionesSatelite(titulo: string, propuesta: string): boolean {
   const terminosTitulo = [...new Set(extraerTerminosLiteralidad(titulo))];
   const terminosPropuesta = new Set(extraerTerminosLiteralidad(propuesta));
@@ -167,7 +139,7 @@ function propuestaEsLiteralParaAsociacionesSatelite(titulo: string, propuesta: s
       compartenRaiz(terminoTitulo, terminoPropuesta),
     );
 
-    return coincidePorRaiz || estanEnMismoGrupoSemantico(terminoTitulo, terminosPropuesta);
+    return coincidePorRaiz;
   }).length;
 
   return coincidencias >= 2 && coincidencias / terminosTitulo.length >= 0.5;
