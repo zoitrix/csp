@@ -16,8 +16,10 @@ interface DetectorVoz {
 const CALIBRACION_RUIDO_MS = 700;
 const SILENCIO_DESPUES_DE_HABLAR_MS = 1200;
 const DURACION_MAXIMA_TURNO_CON_VOZ_MS = 12000;
-const UMBRAL_VOZ_MINIMO = 0.025;
-const UMBRAL_SILENCIO_MINIMO = 0.018;
+const DURACION_MAXIMA_TURNO_SIN_VOZ_MS = 6500;
+const DURACION_MAXIMA_TURNO_ABSOLUTA_MS = 14000;
+const UMBRAL_VOZ_MINIMO = 0.018;
+const UMBRAL_SILENCIO_MINIMO = 0.014;
 
 export function useVoiceTurnRecorder() {
   const [escuchando, setEscuchando] = useState(false);
@@ -145,13 +147,13 @@ export function useVoiceTurnRecorder() {
           const tiempoDesdeInicio = detector.iniciadoEn ? ahora - detector.iniciadoEn : 0;
 
           if (tiempoDesdeInicio < CALIBRACION_RUIDO_MS) {
-            detector.ruidoBase = Math.max(detector.ruidoBase ?? 0, rms);
+            detector.ruidoBase = detector.ruidoBase === null ? rms : Math.min(detector.ruidoBase, rms);
             return;
           }
 
           const ruidoBase = detector.ruidoBase ?? 0;
-          const umbralVoz = Math.max(UMBRAL_VOZ_MINIMO, ruidoBase * 3);
-          const umbralSilencio = Math.max(UMBRAL_SILENCIO_MINIMO, ruidoBase * 1.7);
+          const umbralVoz = Math.max(UMBRAL_VOZ_MINIMO, ruidoBase * 2.2);
+          const umbralSilencio = Math.max(UMBRAL_SILENCIO_MINIMO, ruidoBase * 1.35);
 
           if (rms >= umbralVoz) {
             detector.habloAlMenosUnaVez = true;
@@ -163,10 +165,12 @@ export function useVoiceTurnRecorder() {
           const turnoConVozMs = detector.ultimoSonidoEn && detector.iniciadoEn ? ahora - detector.iniciadoEn : 0;
           const debeCerrarPorSilencio = detector.habloAlMenosUnaVez && rms <= umbralSilencio && silencioMs > SILENCIO_DESPUES_DE_HABLAR_MS;
           const debeCerrarPorMaximo = detector.habloAlMenosUnaVez && turnoConVozMs > DURACION_MAXIMA_TURNO_CON_VOZ_MS;
+          const debeCerrarSinVoz = !detector.habloAlMenosUnaVez && tiempoDesdeInicio > DURACION_MAXIMA_TURNO_SIN_VOZ_MS;
+          const debeCerrarPorAbsoluto = tiempoDesdeInicio > DURACION_MAXIMA_TURNO_ABSOLUTA_MS;
 
           if (
             onSilencio &&
-            (debeCerrarPorSilencio || debeCerrarPorMaximo) &&
+            (debeCerrarPorSilencio || debeCerrarPorMaximo || debeCerrarSinVoz || debeCerrarPorAbsoluto) &&
             !detector.procesandoSilencio
           ) {
             detector.procesandoSilencio = true;
@@ -175,7 +179,7 @@ export function useVoiceTurnRecorder() {
         }, 100),
       };
 
-      mediaRecorder.start();
+      mediaRecorder.start(500);
       setEscuchando(true);
     } catch (error) {
       console.error('Error al iniciar grabación con VAD:', error);
