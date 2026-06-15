@@ -1,6 +1,13 @@
 import styles from '../../structure/base.module.css';
 import { ACTOS_FINALES } from '../constants';
-import type { FaseActo, InformeDirector, MensajeChat } from '../types';
+import type { FaseActo, InformeDirector, MensajeChat, TipoIntervencion } from '../types';
+
+const ETIQUETAS_INTERVENCION: Record<TipoIntervencion, string> = {
+  personaje: 'Personaje',
+  accion: 'Accion',
+  narrador: 'Narrador',
+  tiempo: 'Tiempo',
+};
 
 interface FinalScreenProps {
   historialLetra: MensajeChat[];
@@ -66,7 +73,9 @@ function LibretoFinal({ historialLetra }: { historialLetra: MensajeChat[] }) {
           historialLetra.map((mensaje, index) => (
             <p key={index} style={{ margin: 0, fontSize: '0.95rem', lineHeight: '1.4' }}>
               <strong style={{ color: mensaje.role === 'user' ? '#2980b9' : '#c0392b' }}>
-                {mensaje.role === 'user' ? '👤 Tú: ' : '🤖 Co-Actor: '}
+                {mensaje.role === 'user'
+                  ? `👤 Tu (${ETIQUETAS_INTERVENCION[mensaje.tipo || 'personaje']}): `
+                  : '🤖 Co-Actor: '}
               </strong>
               {mensaje.content === '[SIN_RESPUESTA]' ? '...' : mensaje.content}
             </p>

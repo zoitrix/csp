@@ -3,11 +3,23 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { INFORME_INICIAL, TIEMPOS_INICIALES } from '../constants';
 import { evaluarActoDirector, generarReplicaCoactor, generarTituloChat, transcribirTurno } from '../services/groq';
-import type { DificultadChat, FaseActo, InformeDirector, MensajeChat, PantallaChat, TiemposConfig } from '../types';
+import type {
+  DificultadChat,
+  FaseActo,
+  InformeDirector,
+  MensajeChat,
+  PantallaChat,
+  TiemposConfig,
+  TipoIntervencion,
+} from '../types';
 import { useSpeechSynthesisActor } from './useSpeechSynthesisActor';
 import { useVoiceTurnRecorder } from './useVoiceTurnRecorder';
 
 const FASES_EVALUACION: FaseActo[] = ['intro', 'nudo', 'desenlace'];
+
+function tipoIntervencionEsContexto(tipo: TipoIntervencion): boolean {
+  return tipo === 'accion' || tipo === 'narrador' || tipo === 'tiempo';
+}
 
 function getLineasUsuario(historial: MensajeChat[]): string[] {
   return historial.filter((mensaje) => mensaje.role === 'user').map((mensaje) => mensaje.content.trim()).filter(Boolean);
@@ -92,12 +104,14 @@ export function useImproChatController() {
   const [timeLeft, setTimeLeft] = useState(0);
   const [iaHablando, setIaHablando] = useState(false);
   const [informeFinal, setInformeFinal] = useState<InformeDirector>(INFORME_INICIAL);
+  const [tipoIntervencion, setTipoIntervencion] = useState<TipoIntervencion>('personaje');
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const pantallaRef = useRef<PantallaChat>('config');
   const historialLetraRef = useRef<MensajeChat[]>([]);
   const tituloRef = useRef('');
   const tiemposConfigRef = useRef<TiemposConfig>(TIEMPOS_INICIALES);
+  const tipoIntervencionRef = useRef<TipoIntervencion>('personaje');
   const procesandoTurnoRef = useRef(false);
   const finalizandoRef = useRef(false);
 
@@ -123,6 +137,10 @@ export function useImproChatController() {
   useEffect(() => {
     tiemposConfigRef.current = tiemposConfig;
   }, [tiemposConfig]);
+
+  useEffect(() => {
+    tipoIntervencionRef.current = tipoIntervencion;
+  }, [tipoIntervencion]);
 
   const procesarTurnoConversacionalRef = useRef<() => Promise<void>>(async () => {});
 
@@ -186,7 +204,10 @@ export function useImproChatController() {
       const ultimoTexto = await transcribirTurno(audioBlob);
 
       if (ultimoTexto.trim()) {
-        historialParaEvaluar = [...historialParaEvaluar, { role: 'user', content: ultimoTexto.trim() }];
+        historialParaEvaluar = [
+          ...historialParaEvaluar,
+          { role: 'user', content: ultimoTexto.trim(), tipo: tipoIntervencionRef.current },
+        ];
         setHistorialLetra(historialParaEvaluar);
       }
     } catch (error) {
@@ -241,16 +262,27 @@ export function useImproChatController() {
 
       const nuevoHistorial: MensajeChat[] = [
         ...historialLetraRef.current,
-        { role: 'user', content: transcripcionUsuario },
+        { role: 'user', content: transcripcionUsuario, tipo: tipoIntervencionRef.current },
       ];
 
       setHistorialLetra(nuevoHistorial);
+      historialLetraRef.current = nuevoHistorial;
+
+      if (tipoIntervencionEsContexto(tipoIntervencionRef.current)) {
+        setLoadingTexto('Contexto incorporado a la escena...');
+        setLoading(false);
+        procesandoTurnoRef.current = false;
+        iniciarEscuchaAutomatica();
+        return;
+      }
+
       setLoadingTexto('Tu co-actor esta respondiendo...');
 
       const respuestaIA = await generarReplicaCoactor(nuevoHistorial);
       const historialConIA: MensajeChat[] = [...nuevoHistorial, { role: 'assistant', content: respuestaIA }];
 
       setHistorialLetra(historialConIA);
+      historialLetraRef.current = historialConIA;
       setLoading(false);
       procesandoTurnoRef.current = false;
 
@@ -281,6 +313,7 @@ export function useImproChatController() {
     setLoadingTexto('El publico esta buscando una propuesta...');
     setHistorialLetra([]);
     setInformeFinal(INFORME_INICIAL);
+    setTipoIntervencion('personaje');
     finalizandoRef.current = false;
     procesandoTurnoRef.current = false;
 
@@ -308,6 +341,7 @@ export function useImproChatController() {
     setPantalla('config');
     setIaHablando(false);
     setInformeFinal(INFORME_INICIAL);
+    setTipoIntervencion('personaje');
     finalizandoRef.current = false;
     procesandoTurnoRef.current = false;
   }, [recorder, vozActor]);
@@ -326,8 +360,10 @@ export function useImproChatController() {
     pantalla,
     reiniciarTeatroCompleto,
     setDificultad,
+    setTipoIntervencion,
     tiemposConfig,
     timeLeft,
+    tipoIntervencion,
     titulo,
   };
 }

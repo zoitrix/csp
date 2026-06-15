@@ -6,14 +6,25 @@ const RETARDO_TRAS_CANCELAR_MS = 320;
 const DURACION_DESPERTAR_AUDIO_MS = 260;
 const RETARDO_TRAS_DESPERTAR_AUDIO_MS = 140;
 
-function obtenerVozHumanaSinHelena(): SpeechSynthesisVoice | null {
+type TipoVozEscena = 'actor' | 'narrador';
+
+interface SegmentoVozEscena {
+  texto: string;
+  tipo: TipoVozEscena;
+}
+
+function obtenerVocesEspanol(): SpeechSynthesisVoice[] {
   const voces = window.speechSynthesis.getVoices();
 
   if (voces.length === 0) {
-    return null;
+    return [];
   }
 
-  const vocesPermitidas = voces.filter((voz) => voz.lang.startsWith('es') && !voz.name.toLowerCase().includes('helena'));
+  return voces.filter((voz) => voz.lang.startsWith('es') && !voz.name.toLowerCase().includes('helena'));
+}
+
+function obtenerVozHumanaSinHelena(): SpeechSynthesisVoice | null {
+  const vocesPermitidas = obtenerVocesEspanol();
 
   const premium = vocesPermitidas.find(
     (voz) => voz.name.includes('Google') || voz.name.includes('Natural') || voz.name.includes('Neural'),
@@ -30,11 +41,84 @@ function obtenerVozHumanaSinHelena(): SpeechSynthesisVoice | null {
   return alternativaLocal ?? vocesPermitidas[0] ?? null;
 }
 
-function prepararTextoParaVoz(texto: string): string {
-  return texto.replace(/\s+/g, ' ').trim();
+function obtenerVozNarrador(vozActor: SpeechSynthesisVoice | null): SpeechSynthesisVoice | null {
+  const vocesPermitidas = obtenerVocesEspanol();
+
+  if (vocesPermitidas.length === 0) {
+    return null;
+  }
+
+  const vozDiferente = vocesPermitidas.find((voz) => voz.voiceURI !== vozActor?.voiceURI);
+
+  return vozDiferente ?? vozActor ?? vocesPermitidas[0] ?? null;
 }
 
-function aplicarVozComun(utterance: SpeechSynthesisUtterance, vozElegida: SpeechSynthesisVoice | null) {
+function prepararTextoParaVoz(texto: string): string {
+  return texto
+    .replace(/^\s*(PERSONAJE|ACCION|NARRADOR|TIEMPO)\s*:\s*/i, '')
+    .replace(/^\s*\[([^\]]+)\]\s*$/i, '$1')
+    .replace(/^\s*\[(Narrador|Director|Accion|Acción|Tiempo|Personaje)\]\s*/i, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function detectarTipoSegmento(linea: string): TipoVozEscena {
+  const normalizada = linea.trim().toLowerCase();
+
+  if (/^(narrador|accion|acción|tiempo)\s*:/.test(normalizada)) {
+    return 'narrador';
+  }
+
+  if (/^\[(narrador|director|accion|acción|tiempo)\]/.test(normalizada)) {
+    return 'narrador';
+  }
+
+  if (/^\[[^\]]+\]/.test(normalizada)) {
+    return 'narrador';
+  }
+
+  return 'actor';
+}
+
+function dividirLineaParaVoz(linea: string): SegmentoVozEscena[] {
+  const tipoLinea = detectarTipoSegmento(linea);
+
+  if (tipoLinea === 'narrador') {
+    const textoPreparado = prepararTextoParaVoz(linea);
+    return textoPreparado ? [{ texto: textoPreparado, tipo: 'narrador' }] : [];
+  }
+
+  const lineaSinEtiqueta = linea.replace(/^\s*PERSONAJE\s*:\s*/i, '');
+
+  return lineaSinEtiqueta
+    .split(/(\[[^\]]+\])/g)
+    .map((fragmento) => {
+      const textoPreparado = prepararTextoParaVoz(fragmento);
+
+      if (!textoPreparado) {
+        return null;
+      }
+
+      return {
+        texto: textoPreparado,
+        tipo: /^\s*\[[^\]]+\]\s*$/.test(fragmento) ? 'narrador' : 'actor',
+      };
+    })
+    .filter((segmento): segmento is SegmentoVozEscena => segmento !== null);
+}
+
+function prepararSegmentosVoz(texto: string): SegmentoVozEscena[] {
+  return texto
+    .split(/\n+/)
+    .flatMap(dividirLineaParaVoz)
+    .filter((segmento) => segmento.tipo === 'actor');
+}
+
+function aplicarVozComun(
+  utterance: SpeechSynthesisUtterance,
+  vozElegida: SpeechSynthesisVoice | null,
+  tipo: TipoVozEscena,
+) {
   if (vozElegida) {
     utterance.voice = vozElegida;
     utterance.lang = vozElegida.lang;
@@ -42,8 +126,8 @@ function aplicarVozComun(utterance: SpeechSynthesisUtterance, vozElegida: Speech
     utterance.lang = 'es-ES';
   }
 
-  utterance.rate = 1.08;
-  utterance.pitch = 1.0;
+  utterance.rate = tipo === 'narrador' ? 0.96 : 1.08;
+  utterance.pitch = tipo === 'narrador' ? 0.86 : 1.0;
 }
 
 async function despertarSalidaAudio(): Promise<void> {
@@ -131,9 +215,9 @@ export function useSpeechSynthesisActor(params: {
       return;
     }
 
-    const textoPreparado = prepararTextoParaVoz(texto);
+    const segmentosVoz = prepararSegmentosVoz(texto);
 
-    if (!textoPreparado) {
+    if (segmentosVoz.length === 0) {
       callbackAlTerminar();
       return;
     }
@@ -142,7 +226,8 @@ export function useSpeechSynthesisActor(params: {
     window.speechSynthesis.cancel();
 
     timeoutVozRef.current = setTimeout(async () => {
-      const vozElegida = obtenerVozHumanaSinHelena();
+      const vozActor = obtenerVozHumanaSinHelena();
+      const vozNarrador = obtenerVozNarrador(vozActor);
 
       try {
         await despertarSalidaAudio();
@@ -151,28 +236,46 @@ export function useSpeechSynthesisActor(params: {
         console.warn('No se pudo despertar la salida de audio antes de la voz:', error);
       }
 
-      const utterance = new SpeechSynthesisUtterance(textoPreparado);
-      aplicarVozComun(utterance, vozElegida);
+      let indiceSegmento = 0;
 
-      utterance.onstart = () => {
-        reproduciendoRef.current = true;
-        params.onStart();
-      };
-
-      utterance.onend = () => {
+      const finalizarSecuencia = () => {
         reproduciendoRef.current = false;
         params.onEnd();
         callbackAlTerminar();
       };
 
-      utterance.onerror = (event) => {
-        reproduciendoRef.current = false;
-        console.error('Error en sintesis de voz:', event);
-        params.onEnd();
-        callbackAlTerminar();
+      const reproducirSiguienteSegmento = () => {
+        const segmento = segmentosVoz[indiceSegmento];
+
+        if (!segmento) {
+          finalizarSecuencia();
+          return;
+        }
+
+        const utterance = new SpeechSynthesisUtterance(segmento.texto);
+        aplicarVozComun(utterance, segmento.tipo === 'narrador' ? vozNarrador : vozActor, segmento.tipo);
+
+        utterance.onstart = () => {
+          if (!reproduciendoRef.current) {
+            reproduciendoRef.current = true;
+            params.onStart();
+          }
+        };
+
+        utterance.onend = () => {
+          indiceSegmento += 1;
+          reproducirSiguienteSegmento();
+        };
+
+        utterance.onerror = (event) => {
+          console.error('Error en sintesis de voz:', event);
+          finalizarSecuencia();
+        };
+
+        window.speechSynthesis.speak(utterance);
       };
 
-      window.speechSynthesis.speak(utterance);
+      reproducirSiguienteSegmento();
     }, RETARDO_TRAS_CANCELAR_MS);
   }, [limpiarTimeoutVoz, params]);
 

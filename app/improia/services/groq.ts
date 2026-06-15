@@ -156,6 +156,13 @@ function extraerEvaluacionDirector(textoCrudo: string): Partial<EvaluacionActo> 
   }
 }
 
+function crearMensajesModelo(historial: MensajeChat[]) {
+  return historial.map((mensaje) => ({
+    role: mensaje.role,
+    content: mensaje.content,
+  }));
+}
+
 export async function generarTituloChat(dificultad: DificultadChat, titulos: string[]): Promise<string> {
   return generarTituloComun(dificultad, titulos);
 }
@@ -188,10 +195,10 @@ export async function generarReplicaCoactor(historial: MensajeChat[]): Promise<s
     model: 'llama-3.1-8b-instant',
     messages: [
       { role: 'system', content: crearPromptCoactor(historial) },
-      ...historial,
+      ...crearMensajesModelo(historial),
     ],
     temperature: 0.6,
-    max_tokens: 60,
+    max_tokens: 140,
   });
 
   return response.choices[0]?.message?.content?.trim() || 'Continua, te escucho.';

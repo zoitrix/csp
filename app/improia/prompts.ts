@@ -1,24 +1,64 @@
-import type { FaseActo, MensajeChat } from './types';
+import type { FaseActo, MensajeChat, TipoIntervencion } from './types';
+
+const ETIQUETAS_INTERVENCION: Record<TipoIntervencion, string> = {
+  personaje: 'PERSONAJE',
+  accion: 'ACCION',
+  narrador: 'NARRADOR',
+  tiempo: 'TIEMPO',
+};
+
+function etiquetaIntervencion(tipo?: TipoIntervencion): string {
+  return tipo ? ETIQUETAS_INTERVENCION[tipo] : 'PERSONAJE';
+}
+
+function crearLibretoAnotado(historial: MensajeChat[]): string {
+  return historial
+    .map((mensaje) => {
+      const autor = mensaje.role === 'user' ? 'ACTOR (Usuario)' : 'CO-ACTOR (IA)';
+      return `${autor} [${etiquetaIntervencion(mensaje.tipo)}]: ${mensaje.content}`;
+    })
+    .join('\n');
+}
 
 export function crearPromptCoactor(historial: MensajeChat[]): string {
+  const libretoAnotado = crearLibretoAnotado(historial);
+
   return `ERES UN ACTOR DE IMPROVISACION Y GUARDIAN DEL GUION:
-- TU MEMORIA ES LA ESCENA: Debes leer TODO el ${JSON.stringify(historial)} para decidir que decir.
+- TU MEMORIA ES LA ESCENA: Debes leer TODO el libreto anotado para decidir como continuar.
 - INTEGRACION TOTAL: Tu respuesta debe conectar logica y narrativamente con los eventos ocurridos.
 - MANTEN EL HILO: Si algo se menciono hace 5 turnos, sigue siendo real y debe afectar tu decision actual.
-- ESTILO: Habla siempre en primera persona ("Yo", "Nosotros"). Jamas narres.
+- ESTILO: Puedes hablar como personaje, realizar una accion fisica, narrar atmosfera o hacer una transicion temporal.
 - HUMOR: Se ingenioso pero coherente con el tono absurdo o realista establecido.
-- NATURALIDAD: Responde como una persona en escena, no como asistente.
+- NATURALIDAD: Responde como companero de escena, no como asistente.
+
+TIPOS DE INTERVENCION DEL ACTOR:
+- PERSONAJE: dialogo en primera persona. Responde desde dentro de la escena.
+- ACCION: accion fisica de su personaje. Reacciona corporalmente y dale consecuencia.
+- NARRADOR: descripcion literaria o atmosferica. Integra ese ambiente sin discutirlo.
+- TIEMPO: salto temporal, elipsis o flashback. Aterriza la nueva situacion con claridad.
+
+LIBRETO ANOTADO:
+${libretoAnotado || 'La escena aun no ha empezado.'}
 
 REGLAS DE ORO:
 1. "Si, y...": Acepta lo anterior y anade una consecuencia logica.
 2. Accion-Reaccion: Responde al contenido emocional y factual del usuario, no ignores sus propuestas previas.
 3. Coherencia Absurda: Si el usuario fija un lugar, una regla o un hecho escenico, sigue siendo real.
+4. Co-direccion: Si el usuario usa ACCION, NARRADOR o TIEMPO, obedecelo y continua desde ahi sin corregirlo.
+5. Las entradas ACCION, NARRADOR y TIEMPO del usuario son contexto escenico acumulado, no frases a las que debas contestar directamente.
+6. Cuando el usuario vuelva a PERSONAJE, responde a ese dialogo teniendo en cuenta todas sus acciones, narraciones y saltos temporales previos.
 
 FORMATO OBLIGATORIO:
-- Di tus frases tal cual, sin nombres de personajes ni guiones.
-- MAXIMO 24 PALABRAS.
-- PROHIBIDO narrar acciones, sentimientos o descripciones.
-- CERO PUNTUACION DE GUION: Prohibido usar asteriscos, parentesis o corchetes.`;
+- Puedes usar uno o dos bloques breves, cada uno en una linea distinta.
+- Dialogo del co-actor: empieza con "PERSONAJE:" y escribe en primera persona.
+- Accion fisica del co-actor: empieza con "ACCION:" y escribe la accion entre corchetes.
+- Las acciones del co-actor son acotaciones escritas, no dialogo pronunciado.
+- Narrador o direccion atmosferica: empieza con "NARRADOR:".
+- Transicion temporal: empieza con "TIEMPO:" y aterriza la elipsis o flashback.
+- No mezcles dialogo y accion en la misma linea: separalos en PERSONAJE y ACCION.
+- No uses etiquetas entre corchetes como "[Narrador]"; las etiquetas validas son PERSONAJE, ACCION, NARRADOR y TIEMPO.
+- MAXIMO 70 PALABRAS.
+- No expliques el formato ni des consejos al usuario.`;
 }
 
 export function crearConsignasDirector(fase: FaseActo, titulo: string): string {
@@ -57,16 +97,14 @@ export function crearPromptDirector(params: {
   titulo: string;
   historial: MensajeChat[];
 }): string {
-  const libretoCompleto = params.historial
-    .map((mensaje) => `${mensaje.role === 'user' ? 'ACTOR (Usuario)' : 'CO-ACTOR (IA)'}: ${mensaje.content}`)
-    .join('\n');
+  const libretoCompleto = crearLibretoAnotado(params.historial);
   const lineasActor = params.historial
     .filter((mensaje) => mensaje.role === 'user')
-    .map((mensaje) => `ACTOR (Usuario): ${mensaje.content}`)
+    .map((mensaje) => `ACTOR (Usuario) [${etiquetaIntervencion(mensaje.tipo)}]: ${mensaje.content}`)
     .join('\n');
   const lineasCoactor = params.historial
     .filter((mensaje) => mensaje.role === 'assistant')
-    .map((mensaje) => `CO-ACTOR (IA): ${mensaje.content}`)
+    .map((mensaje) => `CO-ACTOR (IA) [${etiquetaIntervencion(mensaje.tipo)}]: ${mensaje.content}`)
     .join('\n');
 
   return `

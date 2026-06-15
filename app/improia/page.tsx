@@ -52,7 +52,9 @@ export default function ImproChatModularPage() {
               loading={controller.loading}
               loadingTexto={controller.loadingTexto}
               onConcluir={controller.finalizarFuncionYMostrarInforme}
+              onTipoIntervencionChange={controller.setTipoIntervencion}
               timeLeft={controller.timeLeft}
+              tipoIntervencion={controller.tipoIntervencion}
               titulo={controller.titulo}
             />
           )}
