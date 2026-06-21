@@ -32,6 +32,118 @@ export const ESTRATEGIAS_INICIO: EstrategiaInicio[] = [
       'Se queda bloqueado por exceso de libertad (parálisis), ignora por completo el título propuesto, o genera una propuesta caótica que no construye ninguna situación dramática.',
   },
   {
+    id: 'motor-accion',
+    tecnica: 'Arranque por Accion',
+    enfoque: 'Fisico / Motor de Movimiento',
+    mecanica: 'El jugador comienza con una accion fisica concreta (peinarse, barrer, etc.) sin saber aun quien es o donde esta, descubriendo la escena a partir del trabajo con ese motor.',
+    pensamiento: 'Pensamiento kinestesico y de descubrimiento: la accion precede a la justificacion.',
+    idealPara: 'Romper la parálisis del texto, encontrar la escena de forma organica y realismo sucio.',
+    criterioExito: 'Sostenimiento de la actividad fisica e incorporacion del titulo.',
+    ejemplo: 'Título: "Me robaron mi billetera ayer". El alumno entra a escena e inmediatamente simula pasar un trapo de forma obsesiva por una barra invisible, manteniendo el movimiento. Al cabo de unos segundos, se detiene, mira el trapo con frustración y dice: "Ni limpiando se me quita el disgusto de lo de ayer".',
+    indicadoresLogro:
+      'Mantiene la accion fisica concreta de forma nitida durante los primeros segundos, permitiendo que el que, quien o donde emerjan logicamente de ese movimiento corporal.',
+    lucesRojas:
+      'Nombra la accion en lugar de hacerla, o abandona el movimiento fisico por completo en cuanto empieza a hablar.',
+  },
+  {
+    id: 'motor-espacio',
+    tecnica: 'Exploración del Entorno',
+    enfoque: 'Atmosfera / Entorno',
+    mecanica: 'Comienza trabajando con la creacion y exploracion de un espacio imaginario especifico (un baño, una nave espacial, una isla desierta) sugerido o modificado por el titulo.',
+    pensamiento: 'Pensamiento espacial y geografico: el entorno define las reglas del juego.',
+    idealPara: 'Escenas costumbristas, ciencia ficcion, monologos y situaciones de encierro.',
+    criterioExito: 'Consistencia en la interaccion con la arquitectura imaginaria.',
+    ejemplo: 'Título: "Me robaron mi billetera ayer". El alumno camina con cuidado tocando paredes invisibles estrechas, se agacha simulando abrir una taquilla metalica pegada a la pared, busca dentro y palpa las esquinas vacias con desesperacion.',
+    indicadoresLogro:
+      'Respeta las dimensiones, objetos fijas y la atmosfera del lugar elegido a traves de su mirada y comportamiento fisico inicial.',
+    lucesRojas:
+      'Atraviesa paredes imaginarias, olvida donde coloco los elementos del entorno o describe el espacio de palabra sin habitarlo corporalmente.',
+  },
+  {
+    id: 'motor-gesto',
+    tecnica: 'Gesticulación Corporal',
+    enfoque: 'Corporal / Abstracto',
+    mecanica: 'El improvisador sale a escena con un movimiento abstracto o tic corporal que repite constantemente, el cual no constituye una accion cotidiana o concreta en principio.',
+    pensamiento: 'Pensamiento abstracto y ritmico: el bucle corporal genera la psicologia.',
+    idealPara: 'Humor absurdo, estilos expresionistas, creacion de obsesiones y juego corto.',
+    criterioExito: 'Mantenimiento del patron gestual como motor psicologico.',
+    ejemplo: 'Título: "Me robaron mi billetera ayer". El alumno entra estirando rítmicamente el cuello de su camiseta hacia delante y soltándolo de golpe cada tres pasos, con la mirada ida. Tras repetir el gesto tres veces, dice: "Siento que me ahogo desde lo de ayer".',
+    indicadoresLogro:
+      'Sostiene la repeticion del movimiento abstracto con precision formal, utilizandolo como el motor que tiñe su forma de hablar o reaccionar.',
+    lucesRojas:
+      'Realiza el gesto solo una vez a modo de adorno y lo olvida, o lo confunde con una accion cotidiana utilitaria (como rascarse).',
+  },
+  {
+    id: 'motor-tipo-personaje',
+    tecnica: 'Caracterización del Personaje',
+    enfoque: 'Caracterizacion / Estatus',
+    mecanica: 'Empezar la improvisacion adoptando directamente la configuracion corporal, voz, energia y acciones arquetipicas de un tipo social o rol (un mafioso, un filosofo, un ejecutivo, un ser gris).',
+    pensamiento: 'Pensamiento relacional y arquetipico: jugar desde una mascara clara.',
+    idealPara: 'Comedia de caracteres, improvisacion de epoca, sketches y cambio de estatus.',
+    criterioExito: 'Sostenimiento de la mascara corporal y vocal adoptada.',
+    ejemplo: 'Título: "Me robaron mi billetera ayer". El alumno adopta la postura rigida, el pecho inflado y el caminar pesado de un mafioso de pelicula, masca chicle de forma ruda y le dice a su compañero con voz ronca: "Nadie le quita nada a un Leone y vive para contarlo".',
+    indicadoresLogro:
+      'Modifica su registro neutro para encarnar el arquetipo desde el primer segundo a traves del peso, la velocidad de movimiento y el tono de voz.',
+    lucesRojas:
+      'Rompe el personaje y vuelve a su actitud cotidiana en cuanto el compañero le propone un contraestimulo.',
+  },
+  {
+    id: 'motor-estado-animo',
+    tecnica: 'Arranque por Estado de Animo',
+    enfoque: 'Emocional',
+    mecanica: 'Arrancar la escena poseido al cien por cien por una emocion basica o estado interno visceral (triste, miedoso, enamorado) provocado por el significado del titulo.',
+    pensamiento: 'Pensamiento emocional puro: la emocion filtra toda la realidad de la escena.',
+    idealPara: 'Drama, melodrama, comedias de enredo y formatos de alta intensidad.',
+    criterioExito: 'Verdad y consistencia en el filtro emocional escogido.',
+    ejemplo: 'Título: "Me robaron mi billetera ayer". El alumno irrumpe en escena con los ojos desorbitados, temblando visiblemente, mirando hacia atras a cada segundo y sobresaltandose exageradamente ante cualquier ruido minimo del espacio.',
+    indicadoresLogro:
+      'Justifica todo lo que ve y oye a traves del filtro del estado de animo elegido, contagiando la atmosfera emocional al compañero.',
+    lucesRojas:
+      'Menciona la emocion de palabra ("estoy muy triste") pero su cuerpo y energia muestran una neutralidad absoluta.',
+  },
+  {
+    id: 'motor-imagen',
+    tecnica: 'Visualización de una Imagen',
+    enfoque: 'Conceptual / Mental',
+    mecanica: 'Salir a escena con una imagen mental fija en la cabeza e inspirar la energia, velocidad, mirada y tono muscular en la dinamica de esa metafora (un grano de arena en el desierto, un hielo deshaciendose).',
+    pensamiento: 'Pensamiento poetico y analogico: traducir un concepto visual a dinamica corporal.',
+    idealPara: 'Teatro conceptual, formatos de Long Form liricos o experimentales y realismo magico.',
+    criterioExito: 'Traduccion fisica coherente de la metafora interna.',
+    ejemplo: 'Título: "Me robaron mi billetera ayer". El alumno retiene la imagen de "un hielo deshaciéndose". Entra muy rigido y, conforme avanza la escena y recuerda el robo, sus articulaciones se van aflojando pesadamente, derramandose de forma literal sobre una silla.',
+    indicadoresLogro:
+      'Logra plasmar en su dinamica de movimiento, ritmo o mirada la cualidad fisica que inspira la imagen mental elegida.',
+    lucesRojas:
+      'La imagen se queda atrapada en el plano mental del alumno sin traducirse en ningun cambio fisico u organico visible.',
+  },
+  {
+    id: 'motor-sensacion',
+    tecnica: 'Arranque basado en Sensaciones',
+    enfoque: 'Fisico / Organico',
+    mecanica: 'Iniciar la escena condicionado por un estado puramente organico o sensorial del cuerpo (frio, cansancio, desequilibrio, ceguera).',
+    pensamiento: 'Pensamiento organico y sensorial: el estimulo fisico real lidera la improvisacion.',
+    idealPara: 'Formatos dramaticos, teatro fisico, situaciones limite y entrenamiento de escucha corporal.',
+    criterioExito: 'Organicidad y permanencia de la limitacion o condicion fisica.',
+    ejemplo: 'Título: "Me robaron mi billetera ayer". El alumno entra tiritando de forma incontrolable, encogiendose sobre si mismo y frotandose las manos con violencia para buscar calor, vinculando esa desproteccion termica con el desamparo de haber sido robado.',
+    indicadoresLogro:
+      'Mantiene la reaccion fisiologica a la sensacion elegida (pesadez de parpados si es cansancio, temblor si es frio) de manera organica durante toda la introduccion.',
+    lucesRojas:
+      'Sana milagrosamente de la sensacion o limitacion fisica en cuanto el argumento de la escena exige desplazarse o hablar.',
+  },
+  {
+    id: 'motor-texto',
+    tecnica: 'Arranque verbal por Texto',
+    enfoque: 'Verbal / Impulsivo',
+    mecanica: 'Lanzar una frase o palabra contundente nada mas pisar el escenario, utilizandola como un tiro en la oscuridad para descubrir hacia donde lleva y que realidad construye.',
+    pensamiento: 'Pensamiento intuitivo-verbal: compromiso absoluto con el primer impulso oral.',
+    idealPara: 'Formatos de juego corto, comedia rapida, resolucion de bloqueos y estilos realistas.',
+    criterioExito: 'Aceptacion inmediata de la premisa lanzada en la primera linea.',
+    ejemplo: 'Título: "Me robaron mi billetera ayer". El alumno pone un pie en el escenario, mira fijamente al vacio y suelta de golpe a gran volumen: "¡Siete! ¡Siete veces seguidas me ha pasado!". A partir de ahi construye el universo de su mala suerte.',
+    indicadoresLogro:
+      'Lanza la primera frase sin titubeos ni rodeos y asume las consecuencias logicas de sus propias palabras para edificar la plataforma de la escena.',
+    lucesRojas:
+      'Dice una frase ambigua o de relleno ("hola", "bueno") que no propone informacion, o se retracta del sentido de su frase un segundo despues.',
+  },
+  {
     id: 'asociaciones-satelite',
     tecnica: 'Asociaciones Satélite',
     enfoque: 'Narrativo',
@@ -198,5 +310,5 @@ export const ESTRATEGIAS_INICIO: EstrategiaInicio[] = [
       'Se deja contagiar por el tempo del título y mantiene ese patrón rítmico en su habla o cuerpo como motor.',
     lucesRojas:
       'El ritmo se diluye en cuanto empieza a pensar en el argumento o en el texto.',
-  },
+  }
 ];
