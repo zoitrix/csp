@@ -1,7 +1,7 @@
 import type { FaseActo, InformeDirector, TiemposConfig } from './types';
 
 export const TIEMPOS_INICIALES: TiemposConfig = {
-  total: 240,
+  total: 120,
 };
 
 export const INFORME_INICIAL: InformeDirector = {
