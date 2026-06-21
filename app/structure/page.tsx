@@ -21,7 +21,7 @@ export default function ImproBaseModularPage() {
         <p className={styles.subtitulo}>
           {controller.pantalla === 'config'
             ? '¡Saca un título y construye tu historia!'
-            : `Fase Actual: Acto de ${controller.faseActual.toUpperCase()}`}
+            : `Fase actual: Acto de ${controller.faseActual.toUpperCase()}`}
         </p>
       </header>
 
@@ -73,4 +73,3 @@ export default function ImproBaseModularPage() {
     </div>
   );
 }
-

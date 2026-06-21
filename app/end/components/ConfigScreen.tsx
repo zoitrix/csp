@@ -32,8 +32,8 @@ export function ConfigScreen({
   return (
     <div className={styles.bloqueConfig}>
       <div className={styles.recuadroExplicativo}>
-        <div className={styles.tituloMision}>💡Mision de "Finales"💡</div>
-        Elige un tipo de final. La IA generara un titulo, un planteamiento y un nudo; tu trabajo sera cerrar la escena en voz alta aplicando la tecnica elegida.
+        <div className={styles.tituloMision}>💡Misión de "Finales"💡</div>
+        Elige un tipo de final. La IA generará un título, un planteamiento y un nudo; tu trabajo será cerrar la escena en voz alta aplicando la técnica elegida.
       </div>
 
       <br />
@@ -58,7 +58,7 @@ export function ConfigScreen({
             <strong>{tipoFinal.tecnica}</strong> ({tipoFinal.enfoque})
           </p>
           <p>
-            <strong>Mecanica:</strong> {tipoFinal.mecanica}
+            <strong>Mecánica:</strong> {tipoFinal.mecanica}
           </p>
           <p style={{ marginBottom: 0 }}>
             <strong>Criterio:</strong> {tipoFinal.criterioExito}
@@ -72,9 +72,9 @@ export function ConfigScreen({
             value={dificultad}
             onChange={(event) => onDificultadChange(event.target.value as DificultadEnd)}
           >
-            <option value="facil">Facil (Cotidiano)</option>
+            <option value="facil">Fácil (Cotidiano)</option>
             <option value="media">Medio (Interesante)</option>
-            <option value="dificil">Dificil (Locura)</option>
+            <option value="dificil">Difícil (Locura)</option>
           </select>
         </label>
 
@@ -100,7 +100,7 @@ export function ConfigScreen({
           href="/"
           style={{ textAlign: 'center', textDecoration: 'none' }}
         >
-          Volver al menu
+          Volver al menú
         </Link>
       </div>
     </div>

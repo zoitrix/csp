@@ -1,5 +1,6 @@
-﻿import { OpenAI } from 'openai';
+import { OpenAI } from 'openai';
 import { crearAvisoVariedadTitulos, tituloSePareceAHistorial } from './titleSimilarity';
+import { normalizarTextoVisible } from './textEncoding';
 
 const INTENTOS_TITULO = 4;
 const MAX_TITULOS_HISTORIAL_PROMPT = 3;
@@ -124,7 +125,7 @@ function crearClienteGroq(): OpenAI {
   const apiKey = process.env.NEXT_PUBLIC_API_KEY;
 
   if (!apiKey || apiKey.trim() === '') {
-    throw new Error('La API Key de Groq no esta configurada.');
+    throw new Error('La API Key de Groq no está configurada.');
   }
 
   return new OpenAI({
@@ -213,11 +214,11 @@ function elegirTituloFallback(dificultad: string, titulos: string[], rechazados:
 }
 
 function tituloUsaPlantillaPersonalObvia(titulo: string): boolean {
-  const normalizado = titulo
+  const normalizado = normalizarTextoVisible(titulo)
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[Â¿?Â¡!.,;:]/g, '')
+    .replace(/[¿?¡!.,;:]/g, '')
     .replace(/\s+/g, ' ')
     .trim();
 
@@ -227,7 +228,7 @@ function tituloUsaPlantillaPersonalObvia(titulo: string): boolean {
 }
 
 function normalizarTituloParaValidacion(titulo: string): string {
-  return titulo
+  return normalizarTextoVisible(titulo)
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
@@ -241,7 +242,7 @@ function extraerPalabrasTitulo(titulo: string): string[] {
 }
 
 function tituloTieneMayusculasInternasInjustificadas(titulo: string): boolean {
-  const palabrasOriginales = titulo.split(/\s+/).filter(Boolean);
+  const palabrasOriginales = normalizarTextoVisible(titulo).split(/\s+/).filter(Boolean);
 
   return palabrasOriginales.some((palabra, index) => {
     if (index === 0) {
@@ -371,7 +372,7 @@ function normalizarMayusculasTitulo(titulo: string): string {
 }
 
 function limpiarTituloGenerado(textoCrudo: string): string {
-  const sinPrefijo = textoCrudo.replace(
+  const sinPrefijo = normalizarTextoVisible(textoCrudo).replace(
     /^(?:aqui tienes(?: una frase| un titulo)?|(?:el|la|un|una)?\s*(?:frase final|frase|titulo|titular|propuesta|respuesta)\s+(?:puede|podria|debe|seria|es)\s*:?\s*|frase final|frase|titulo|titular|propuesta|respuesta)\s*:\s*/i,
     '',
   );
@@ -379,8 +380,8 @@ function limpiarTituloGenerado(textoCrudo: string): string {
   return sinPrefijo
     .replace(/\s*[\(\[\{][^\)\]\}]*[\)\]\}]\s*/g, ' ')
     .replace(/[*_~]+/g, '')
-    .replace(/["'`â€œâ€â€˜â€™Â«Â»]/g, '')
-    .replace(/[.ã€‚]+$/g, '')
+    .replace(/["'`“”‘’«»]/g, '')
+    .replace(/[.。]+$/g, '')
     .replace(/\s+/g, ' ')
     .trim()
     .replace(/^(.+)$/, normalizarMayusculasTitulo);

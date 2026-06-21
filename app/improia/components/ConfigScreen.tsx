@@ -22,13 +22,13 @@ export function ConfigScreen({
   return (
     <div className={styles.bloqueConfig}>
       <div className={styles.recuadroExplicativo}>
-        <div className={styles.tituloMision}>Mision de ImprovIA</div>
-        Manten una conversacion escenica natural con un co-actor virtual. La IA respondera cuando detecte que has
+        <div className={styles.tituloMision}>Misión de ImprovIA</div>
+        Mantén una conversación escénica natural con un co-actor virtual. La IA responderá cuando detecte que has
         dejado de hablar durante un momento.
         <br />
         <br />
         No hay actos cronometrados: improvisa libremente durante el tiempo total y pulsa terminar cuando la obra tenga
-        cierre. El director evaluara despues introduccion, nudo y desenlace.
+        cierre. El director evaluará después introducción, nudo y desenlace.
       </div>
 
       <br />
@@ -61,14 +61,14 @@ export function ConfigScreen({
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginTop: '25px' }}>
         <button className={`${styles.btnTeatro} ${styles.btnComenzar}`} onClick={onIniciar} disabled={loading}>
-          {loading ? 'Inicializando...' : 'Subir el Telon'}
+          {loading ? 'Inicializando...' : 'Subir el Telón'}
         </button>
         <Link
           className={`${styles.btnTeatro} ${styles.btnRepetir}`}
           href="/"
           style={{ textAlign: 'center', textDecoration: 'none' }}
         >
-          Volver al menu
+          Volver al menú
         </Link>
       </div>
     </div>

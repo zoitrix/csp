@@ -210,7 +210,7 @@ export function useSpeechSynthesisActor(params: {
 
   const reproducirVoz = useCallback((texto: string, callbackAlTerminar: () => void) => {
     if (typeof window === 'undefined' || !window.speechSynthesis) {
-      console.warn('SpeechSynthesis no esta soportado.');
+      console.warn('SpeechSynthesis no está soportado.');
       callbackAlTerminar();
       return;
     }

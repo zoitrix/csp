@@ -9,17 +9,17 @@ const OPCIONES_INTERVENCION: Array<{
   {
     id: 'personaje',
     label: 'Personaje',
-    ayuda: 'Dialogo en primera persona.',
+    ayuda: 'Diálogo en primera persona.',
   },
   {
     id: 'accion',
-    label: 'Accion',
-    ayuda: 'Accion fisica de tu personaje.',
+    label: 'Acción',
+    ayuda: 'Acción física de tu personaje.',
   },
   {
     id: 'narrador',
     label: 'Narrador',
-    ayuda: 'Descripcion literaria o atmosferica.',
+    ayuda: 'Descripción literaria o atmosférica.',
   },
   {
     id: 'tiempo',
@@ -30,14 +30,14 @@ const OPCIONES_INTERVENCION: Array<{
 
 const ETIQUETAS_INTERVENCION: Record<TipoIntervencion, string> = {
   personaje: 'Personaje',
-  accion: 'Accion',
+  accion: 'Acción',
   narrador: 'Narrador',
   tiempo: 'Tiempo',
 };
 
 const ETIQUETAS_IA: Record<TipoIntervencion, string> = {
-  personaje: 'Co-Actor',
-  accion: 'Direccion',
+  personaje: 'Co-actor',
+  accion: 'Dirección',
   narrador: 'Narrador',
   tiempo: 'Tiempo',
 };
@@ -207,11 +207,11 @@ function MissionPanel() {
   return (
     <div className={styles.recuadroExplicativo} style={{ backgroundColor: '#fffdf5', border: '1px solid var(--color-oro)' }}>
       <p style={{ color: '#b92929', textAlign: 'center', marginTop: 0 }}>
-        <strong>Escena continua con co-direccion</strong>
+        <strong>Escena continua con co-dirección</strong>
       </p>
       <p style={{ marginBottom: 0 }}>
-        Elige como quieres intervenir y habla con naturalidad. Cuando calles un momento, la IA respondera como co-actor
-        y tambien podra usar dialogo, accion, narracion o transiciones temporales.
+        Elige cómo quieres intervenir y habla con naturalidad. Cuando calles un momento, la IA responderá como co-actor
+        y también podrá usar diálogo, acción, narración o transiciones temporales.
       </p>
     </div>
   );
@@ -286,8 +286,8 @@ function VoiceStatus({
       ) : escuchando ? (
         <p className={styles.textoHablado}>
           {tipoIntervencionEsContexto(tipoIntervencion)
-            ? `Habla ahora como ${ETIQUETAS_INTERVENCION[tipoIntervencion]}. Se incorporara a la escena sin respuesta inmediata.`
-            : `Habla ahora como ${ETIQUETAS_INTERVENCION[tipoIntervencion]}. La IA respondera cuando detecte silencio.`}
+            ? `Habla ahora como ${ETIQUETAS_INTERVENCION[tipoIntervencion]}. Se incorporará a la escena sin respuesta inmediata.`
+            : `Habla ahora como ${ETIQUETAS_INTERVENCION[tipoIntervencion]}. La IA responderá cuando detecte silencio.`}
         </p>
       ) : iaHablando ? (
         <p className={styles.textoHablado}>Tu co-actor responde...</p>
@@ -303,7 +303,7 @@ function RecentDialogue({ historialLetra }: { historialLetra: MensajeChat[] }) {
     <div className={styles.historialRecorte}>
       {historialLetra.length === 0 ? (
         <div className={`${styles.lineaDialogo} ${styles.assistant}`}>
-          <strong>Co-Actor: </strong>
+          <strong>Co-actor: </strong>
           Empieza cuando quieras; estoy escuchando.
         </div>
       ) : (
@@ -330,7 +330,7 @@ function AssistantContent({ content }: { content: string }) {
   if (lineas.length === 0) {
     return (
       <>
-        <strong>Co-Actor: </strong>
+        <strong>Co-actor: </strong>
         {content}
       </>
     );

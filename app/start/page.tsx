@@ -16,7 +16,7 @@ export default function StartPage() {
         <p className={styles.subtitulo}>
           {controller.pantalla === 'config'
             ? 'Elige una estrategia y prepara el primer impulso'
-            : 'Describe como abririas la escena'}
+            : 'Describe cómo abrirías la escena'}
         </p>
       </header>
 

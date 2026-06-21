@@ -1,4 +1,4 @@
-﻿import type { EscenaFinal, TipoFinal } from './types';
+import type { EscenaFinal, TipoFinal } from './types';
 
 export const TIEMPO_INICIAL_FINAL = 30;
 
@@ -12,91 +12,91 @@ export const TIPOS_FINAL: TipoFinal[] = [
   {
     id: 'final-cerrado',
     tecnica: 'Final Cerrado',
-    enfoque: 'Resolucion / Conclusion',
+    enfoque: 'Resolución / Conclusión',
     mecanica:
-      'Identifica el conflicto principal de la escena y ejecuta una accion o toma una decision definitiva que responda a la gran pregunta de la historia, eliminando la necesidad de continuidad.',
+      'Identifica el conflicto principal de la escena y ejecuta una acción o toma una decisión definitiva que responda a la gran pregunta de la historia, eliminando la necesidad de continuidad.',
     pensamiento:
       'Pensamiento convergente y resolutivo: cerrar hilos narrativos en lugar de abrir nuevas subtramas.',
     idealPara:
-      'Formatos cortos de improvisacion, escenas independientes y entrenamiento de estructura clasica aristotelica.',
+      'Formatos cortos de improvisación, escenas independientes y entrenamiento de estructura clásica aristotélica.',
     criterioExito:
-      'Resolucion del conflicto principal de forma clara y contundente, sin dejar preguntas importantes en el aire.',
-    ejemplo: 'Descripcion generica sin tema concreto: aplica la tecnica mediante una accion escenica visible, una relacion jugable y una decision clara de personaje.',
+      'Resolución del conflicto principal de forma clara y contundente, sin dejar preguntas importantes en el aire.',
+    ejemplo: 'Descripción genérica sin tema concreto: aplica la técnica mediante una acción escénica visible, una relación jugable y una decisión clara de personaje.',
     indicadoresLogro:
-      'Resuelve el motor de la escena de manera definitiva, ofrece una conclusion satisfactoria para el espectador y limpia los cabos sueltos argumentales antes del apagon.',
+      'Resuelve el motor de la escena de manera definitiva, ofrece una conclusión satisfactoria para el espectador y limpia los cabos sueltos argumentales antes del apagón.',
     lucesRojas:
-      'La escena termina por inercia o aburrimiento sin resolver el problema inicial, se introduce un conflicto nuevo en el ultimo segundo que invalida el cierre o se alarga el dialogo en un bucle repetitivo.',
+      'La escena termina por inercia o aburrimiento sin resolver el problema inicial, se introduce un conflicto nuevo en el último segundo que invalida el cierre o se alarga el diálogo en un bucle repetitivo.',
   },
   {
     id: 'final-abierto',
     tecnica: 'Final Abierto',
-    enfoque: 'Tension / Cliffhanger',
+    enfoque: 'Tensión / Cliffhanger',
     mecanica:
-      'Eleva el conflicto al punto de maxima tension o revela un elemento critico inminente, cortando la escena justo antes de que se produzca la resolucion.',
+      'Eleva el conflicto al punto de máxima tensión o revela un elemento crítico inminente, cortando la escena justo antes de que se produzca la resolución.',
     pensamiento:
-      'Pensamiento estrategico y de suspension: sostener la incertidumbre y proyectar el futuro en la mente del publico.',
+      'Pensamiento estratégico y de suspensión: sostener la incertidumbre y proyectar el futuro en la mente del público.',
     idealPara:
-      'Formatos largos, transiciones de capitulos, estructura serial y escenas que entrenan ritmo y timing.',
+      'Formatos largos, transiciones de capítulos, estructura serial y escenas que entrenan ritmo y timing.',
     criterioExito:
-      'Cortar la escena exactamente en el climax de tension, dejando al publico con la intriga en su punto maximo.',
-    ejemplo: 'Descripcion generica sin tema concreto: aplica la tecnica mediante una accion escenica visible, una relacion jugable y una decision clara de personaje.',
+      'Cortar la escena exactamente en el clímax de tensión, dejando al público con la intriga en su punto máximo.',
+    ejemplo: 'Descripción genérica sin tema concreto: aplica la técnica mediante una acción escénica visible, una relación jugable y una decisión clara de personaje.',
     indicadoresLogro:
-      'Identifica el pico mas alto de la accion dramatica para congelar o detener la escena, y plantea una situacion donde las consecuencias futuras quedan claras y sugeridas para el espectador.',
+      'Identifica el pico más alto de la acción dramática para congelar o detener la escena, y plantea una situación donde las consecuencias futuras quedan claras y sugeridas para el espectador.',
     lucesRojas:
       'Cortar la escena en un momento plano o confuso, retardar tanto el corte que el misterio se resuelva solo, o transformar el final abierto en un final cerrado.',
   },
   {
     id: 'final-circular',
     tecnica: 'Final Circular',
-    enfoque: 'Simetria / Retorno',
+    enfoque: 'Simetría / Retorno',
     mecanica:
-      'Utiliza la memoria escenica para recuperar con precision mimetica el elemento inicial de la escena y otorgarle un nuevo significado tras el viaje de los personajes.',
+      'Utiliza la memoria escénica para recuperar con precisión mimética el elemento inicial de la escena y otorgarle un nuevo significado tras el viaje de los personajes.',
     pensamiento:
       'Pensamiento asociativo: conectar desenlace con la plataforma inicial de la historia.',
     idealPara:
-      'Formatos de comedia, improvisaciones poeticas y entrenamiento de escucha a largo plazo y memoria espacial.',
+      'Formatos de comedia, improvisaciones poéticas y entrenamiento de escucha a largo plazo y memoria espacial.',
     criterioExito:
-      'Conectar a la perfeccion con el inicio, otorgandole un nuevo significado a la escena.',
-    ejemplo: 'Descripcion generica sin tema concreto: aplica la tecnica mediante una accion escenica visible, una relacion jugable y una decision clara de personaje.',
+      'Conectar a la perfección con el inicio, otorgándole un nuevo significado a la escena.',
+    ejemplo: 'Descripción genérica sin tema concreto: aplica la técnica mediante una acción escénica visible, una relación jugable y una decisión clara de personaje.',
     indicadoresLogro:
-      'Demuestra una excelente memoria escenica al replicar el inicio y justifica organicamente por que los personajes regresan al origen, mostrando el impacto del cambio o el bucle que habitan.',
+      'Demuestra una excelente memoria escénica al replicar el inicio y justifica orgánicamente por qué los personajes regresan al origen, mostrando el impacto del cambio o el bucle que habitan.',
     lucesRojas:
-      'Ignorar por completo el punto de partida, intentar hacer un cierre circular entrando en la frase original o en la posicion fisica sin que conecte con el publico, o destruir la simetria estetica.',
+      'Ignorar por completo el punto de partida, intentar hacer un cierre circular entrando en la frase original o en la posición física sin que conecte con el público, o destruir la simetría estética.',
   },
   {
     id: 'final-giro-inesperado',
     tecnica: 'Final de Giro Inesperado',
-    enfoque: 'Sorpresa / Recontextualizacion',
+    enfoque: 'Sorpresa / Recontextualización',
     mecanica:
-      'Introduce una revelacion o informacion oculta en los ultimos segundos que cambia por completo el sentido de todo lo que el publico ha visto, apoyandose en pistas sutiles dejadas previamente.',
+      'Introduce una revelación o información oculta en los últimos segundos que cambia por completo el sentido de todo lo que el público ha visto, apoyándose en pistas sutiles dejadas previamente.',
     pensamiento:
-      'Pensamiento lateral y de doble codificacion: construir una realidad aparente mientras se siembran pistas de la realidad oculta.',
+      'Pensamiento lateral y de doble codificación: construir una realidad aparente mientras se siembran pistas de la realidad oculta.',
     idealPara:
       'Formatos de misterio, suspense, drama o comedia inteligente, y alumnos avanzados que dominan la sutileza.',
     criterioExito:
-      'La revelacion final es sorprendente pero logica gracias a las pistas sutiles que se sembraron durante la escena.',
-    ejemplo: 'Descripcion generica sin tema concreto: aplica la tecnica mediante una accion escenica visible, una relacion jugable y una decision clara de personaje.',
+      'La revelación final es sorprendente pero lógica gracias a las pistas sutiles que se sembraron durante la escena.',
+    ejemplo: 'Descripción genérica sin tema concreto: aplica la técnica mediante una acción escénica visible, una relación jugable y una decisión clara de personaje.',
     indicadoresLogro:
-      'Siembra pistas validas durante el desarrollo sin hacerlas evidentes, y ejecuta la revelacion final con total coherencia, provocando una recontextualizacion inmediata en la mente del espectador.',
+      'Siembra pistas válidas durante el desarrollo sin hacerlas evidentes, y ejecuta la revelación final con total coherencia, provocando una recontextualización inmediata en la mente del espectador.',
     lucesRojas:
-      'Sacarse de la manga un final tramposo que no tiene relacion con lo anterior, generar un giro que contradice la logica interna de la escena o confunde al companero de juego.',
+      'Sacarse de la manga un final tramposo que no tiene relación con lo anterior, generar un giro que contradice la lógica interna de la escena o confunde al compañero de juego.',
   },
   {
     id: 'final-anticlimax',
-    tecnica: 'Final Anticlimax',
-    enfoque: 'Contraste / Ruptura Comica',
+    tecnica: 'Final Anticlímax',
+    enfoque: 'Contraste / Ruptura Cómica',
     mecanica:
-      'Construye y exagera una atmosfera de extrema gravedad, peligro o drama epico para, en el ultimo segundo, desinflar la tension por completo resolviendo el conflicto con un elemento cotidiano, banal o ridiculo.',
+      'Construye y exagera una atmósfera de extrema gravedad, peligro o drama épico para, en el último segundo, desinflar la tensión por completo resolviendo el conflicto con un elemento cotidiano, banal o ridículo.',
     pensamiento:
-      'Pensamiento del absurdo y manejo del ritmo: sostener la verdad de la tragedia para potenciar el remate comico.',
+      'Pensamiento del absurdo y manejo del ritmo: sostener la verdad de la tragedia para potenciar el remate cómico.',
     idealPara:
-      'Escenas comicas, parodias de genero y entrenamiento de modulacion de energia e intensidad en escena.',
+      'Escenas cómicas, parodias de género y entrenamiento de modulación de energía e intensidad en escena.',
     criterioExito:
-      'Elevar la tension al maximo y desinflarla de golpe hacia algo cotidiano con un ritmo comico excelente.',
-    ejemplo: 'Descripcion generica sin tema concreto: aplica la tecnica mediante una accion escenica visible, una relacion jugable y una decision clara de personaje.',
+      'Elevar la tensión al máximo y desinflarla de golpe hacia algo cotidiano con un ritmo cómico excelente.',
+    ejemplo: 'Descripción genérica sin tema concreto: aplica la técnica mediante una acción escénica visible, una relación jugable y una decisión clara de personaje.',
     indicadoresLogro:
-      'Mantiene una actuacion honesta y de alta intensidad dramatica durante el nudo de la escena y ejecuta la caida de tension de forma drastica y rapida, clavando el timing del chiste.',
+      'Mantiene una actuación honesta y de alta intensidad dramática durante el nudo de la escena y ejecuta la caída de tensión de forma drástica y rápida, clavando el timing del chiste.',
     lucesRojas:
-      'No construir suficiente tension dramatica previa, abandonar la verdad del personaje antes del remate o romper la magia comica de la escena.',
+      'No construir suficiente tensión dramática previa, abandonar la verdad del personaje antes del remate o romper la magia cómica de la escena.',
   },
 ];

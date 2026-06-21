@@ -42,7 +42,7 @@ export function FeedbackScreen({
           ) : textoUsuario.trim() ? (
             `"${textoUsuario.trim()}"`
           ) : (
-            <i>[No se detecto voz o el escenario se quedo en silencio]</i>
+            <i>[No se detectó voz o el escenario se quedó en silencio]</i>
           )}
         </p>
       </div>

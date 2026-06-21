@@ -27,8 +27,8 @@ export default function ImproChatModularPage() {
           <h1>🎭 ImprovIA 🎬</h1>
           <p className={styles.subtitulo}>
             {controller.pantalla === 'config'
-              ? 'Ajusta el tiempo total de la improvisacion'
-              : 'Conversacion continua con co-actor virtual'}
+              ? 'Ajusta el tiempo total de la improvisación'
+              : 'Conversación continua con co-actor virtual'}
           </p>
         </header>
 

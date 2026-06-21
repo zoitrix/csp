@@ -3,6 +3,7 @@ import { PATRONES_WHISPER_FANTASMA } from '../constants';
 import { crearPromptCoactor, crearPromptDirector } from '../prompts';
 import type { DificultadChat, EvaluacionActo, FaseActo, MensajeChat } from '../types';
 import { generarTituloComun } from '../../shared/titleGeneration';
+import { normalizarTextoVisible } from '../../shared/textEncoding';
 
 const MAX_MENSAJES_MODELO = 10;
 
@@ -161,7 +162,7 @@ function extraerEvaluacionDirector(textoCrudo: string): Partial<EvaluacionActo> 
 function crearMensajesModelo(historial: MensajeChat[]) {
   return historial.slice(-MAX_MENSAJES_MODELO).map((mensaje) => ({
     role: mensaje.role,
-    content: mensaje.content.replace(/\s+/g, ' ').trim().slice(0, 280),
+    content: normalizarTextoVisible(mensaje.content).replace(/\s+/g, ' ').trim().slice(0, 280),
   }));
 }
 
@@ -187,7 +188,7 @@ export async function transcribirTurno(audioBlob: Blob | null): Promise<string> 
     prompt: '.',
   });
 
-  const textoCrudo = respuestaWhisper.text?.trim() || '';
+  const textoCrudo = normalizarTextoVisible(respuestaWhisper.text?.trim() || '');
   return esAlucinacionAudio(textoCrudo) ? '' : textoCrudo;
 }
 
@@ -203,7 +204,7 @@ export async function generarReplicaCoactor(historial: MensajeChat[]): Promise<s
     max_tokens: 95,
   });
 
-  return response.choices[0]?.message?.content?.trim() || 'Continua, te escucho.';
+  return normalizarTextoVisible(response.choices[0]?.message?.content?.trim() || 'Continua, te escucho.');
 }
 
 export async function evaluarActoDirector(params: {
@@ -230,11 +231,13 @@ export async function evaluarActoDirector(params: {
 
   return {
     aprobado: !!resultado.aprobado && !desenlaceAbierto && !introDesconectada,
-    comentario: introDesconectada
-      ? 'El actor no integra el titulo desde sus propias lineas. El co-actor puede construir contexto alrededor, pero para aprobar la introduccion necesito que el usuario aporte una imagen, un lugar, un objeto o un conflicto reconocible del estimulo. Ahora la escena no demuestra una plataforma nacida del titulo, asi que falta una primera decision escenica clara.'
+    comentario: normalizarTextoVisible(
+      introDesconectada
+      ? 'El actor no integra el título desde sus propias líneas. El co-actor puede construir contexto alrededor, pero para aprobar la introducción necesito que el usuario aporte una imagen, un lugar, un objeto o un conflicto reconocible del estímulo. Ahora la escena no demuestra una plataforma nacida del título, así que falta una primera decisión escénica clara.'
       : desenlaceAbierto
-        ? 'El nudo tiene energia y puede haber buenas propuestas previas, pero el ultimo turno deja la accion pendiente o formulada como pregunta. Para aprobar el desenlace necesito una consecuencia visible: acuerdo, fracaso, victoria, castigo, fuga completada o remate definitivo. Aqui todavia falta la ultima decision que cierre la obra ante el publico.'
+        ? 'El nudo tiene energía y puede haber buenas propuestas previas, pero el último turno deja la acción pendiente o formulada como pregunta. Para aprobar el desenlace necesito una consecuencia visible: acuerdo, fracaso, victoria, castigo, fuga completada o remate definitivo. Aquí todavía falta la última decisión que cierre la obra ante el público.'
         : resultado.comentario || 'Cumple con el ritmo del libreto.',
-    transcripcionAcumulada: propuestaFinal === '[SIN_RESPUESTA]' ? 'Sin intervencion de voz.' : propuestaFinal,
+    ),
+    transcripcionAcumulada: propuestaFinal === '[SIN_RESPUESTA]' ? 'Sin intervención de voz.' : propuestaFinal,
   };
 }

@@ -59,9 +59,9 @@ function evaluarCriterioLocal(fase: FaseActo, historial: MensajeChat[], textoAct
     return {
       aprobado,
       comentario: aprobado
-        ? 'La introduccion ofrece una plataforma jugable porque el actor sostiene varias intervenciones, abre una situacion reconocible y empieza a negociar un conflicto con el co-actor. Aunque el Director automatico no pudo completar su lectura, el libreto muestra suficiente relacion escenica, objetivo y tension inicial para arrancar la obra con claridad.'
-        : 'La introduccion queda demasiado debil porque el actor aporta pocas lineas o material demasiado general. Para aprobar, deberia verse una situacion concreta, una relacion escenica y un primer conflicto conectado al titulo, no solo una frase suelta o una respuesta que dependa de que el co-actor invente toda la plataforma.',
-      transcripcionAcumulada: textoActor || 'Sin intervencion de voz.',
+        ? 'La introducción ofrece una plataforma jugable porque el actor sostiene varias intervenciones, abre una situación reconocible y empieza a negociar un conflicto con el co-actor. Aunque el Director automático no pudo completar su lectura, el libreto muestra suficiente relación escénica, objetivo y tensión inicial para arrancar la obra con claridad.'
+        : 'La introducción queda demasiado débil porque el actor aporta pocas líneas o material demasiado general. Para aprobar, debería verse una situación concreta, una relación escénica y un primer conflicto conectado al título, no solo una frase suelta o una respuesta que dependa de que el co-actor invente toda la plataforma.',
+      transcripcionAcumulada: textoActor || 'Sin intervención de voz.',
     };
   }
 
@@ -74,9 +74,9 @@ function evaluarCriterioLocal(fase: FaseActo, historial: MensajeChat[], textoAct
     return {
       aprobado,
       comentario: aprobado
-        ? 'El nudo muestra desarrollo suficiente porque el actor mantiene varias rondas de intercambio, acepta el juego propuesto y empuja la situacion hacia complicaciones nuevas. Se aprecia escucha activa y progresion, aunque convendria concentrar mejor los giros para que no parezcan solo variaciones del mismo problema.'
-        : 'El nudo queda plano o demasiado corto. Para aprobar, la obra necesita una complicacion reconocible: revelacion, obstaculo, cambio de estrategia, amenaza o escalada que transforme la situacion inicial. Aqui el actor no empuja lo bastante el conflicto y la escena no gana una segunda capa dramatica clara.',
-      transcripcionAcumulada: textoActor || 'Sin intervencion de voz.',
+        ? 'El nudo muestra desarrollo suficiente porque el actor mantiene varias rondas de intercambio, acepta el juego propuesto y empuja la situación hacia complicaciones nuevas. Se aprecia escucha activa y progresión, aunque convendría concentrar mejor los giros para que no parezcan solo variaciones del mismo problema.'
+        : 'El nudo queda plano o demasiado corto. Para aprobar, la obra necesita una complicación reconocible: revelación, obstáculo, cambio de estrategia, amenaza o escalada que transforme la situación inicial. Aquí el actor no empuja lo bastante el conflicto y la escena no gana una segunda capa dramática clara.',
+      transcripcionAcumulada: textoActor || 'Sin intervención de voz.',
     };
   }
 
@@ -86,9 +86,9 @@ function evaluarCriterioLocal(fase: FaseActo, historial: MensajeChat[], textoAct
   return {
     aprobado,
     comentario: aprobado
-      ? 'El desenlace alcanza un cierre reconocible porque el actor participa en una decision final y la escena deja de abrir problemas nuevos. La solucion puede ser absurda o sencilla, pero funciona si convierte el juego acumulado en una consecuencia clara para los personajes y permite apagar la escena sin preguntas importantes pendientes.'
-      : 'La escena no termina de cerrar. El actor puede haber sostenido bien el nudo, pero el final necesita una decision, consecuencia visible o remate definitivo. Si la ultima intervencion deja una pregunta, un plan futuro o una amenaza activa, el publico sigue esperando el verdadero cierre.',
-    transcripcionAcumulada: textoActor || 'Sin intervencion de voz.',
+      ? 'El desenlace alcanza un cierre reconocible porque el actor participa en una decisión final y la escena deja de abrir problemas nuevos. La solución puede ser absurda o sencilla, pero funciona si convierte el juego acumulado en una consecuencia clara para los personajes y permite apagar la escena sin preguntas importantes pendientes.'
+      : 'La escena no termina de cerrar. El actor puede haber sostenido bien el nudo, pero el final necesita una decisión, consecuencia visible o remate definitivo. Si la última intervención deja una pregunta, un plan futuro o una amenaza activa, el público sigue esperando el verdadero cierre.',
+    transcripcionAcumulada: textoActor || 'Sin intervención de voz.',
   };
 }
 
@@ -163,7 +163,7 @@ export function useImproChatController() {
     const entradas = [];
 
     for (const fase of FASES_EVALUACION) {
-      setLoadingTexto(`El Director evalua ${fase}...`);
+      setLoadingTexto(`El Director evalúa ${fase}...`);
 
       try {
         const evaluacion = await evaluarActoDirector({
@@ -194,7 +194,7 @@ export function useImproChatController() {
 
     finalizandoRef.current = true;
     setLoading(true);
-    setLoadingTexto('El Director esta evaluando la obra completa...');
+    setLoadingTexto('El Director está evaluando la obra completa...');
     vozActor.cancelarVoz();
 
     let historialParaEvaluar = historialLetraRef.current;
@@ -211,7 +211,7 @@ export function useImproChatController() {
         setHistorialLetra(historialParaEvaluar);
       }
     } catch (error) {
-      console.error('No se pudo recuperar el ultimo turno antes de evaluar:', error);
+      console.error('No se pudo recuperar el último turno antes de evaluar:', error);
       recorder.cancelarGrabacion();
     }
 
@@ -276,7 +276,7 @@ export function useImproChatController() {
         return;
       }
 
-      setLoadingTexto('Tu co-actor esta respondiendo...');
+      setLoadingTexto('Tu co-actor está respondiendo...');
 
       const respuestaIA = await generarReplicaCoactor(nuevoHistorial);
       const historialConIA: MensajeChat[] = [...nuevoHistorial, { role: 'assistant', content: respuestaIA }];
@@ -305,12 +305,12 @@ export function useImproChatController() {
     try {
       streamInicial = await recorder.solicitarMicrofono();
     } catch {
-      alert('El escenario requiere permisos de microfono.');
+      alert('El escenario requiere permisos de micrófono.');
       return;
     }
 
     setLoading(true);
-    setLoadingTexto('El publico esta buscando una propuesta...');
+    setLoadingTexto('El público está buscando una propuesta...');
     setHistorialLetra([]);
     setInformeFinal(INFORME_INICIAL);
     setTipoIntervencion('personaje');

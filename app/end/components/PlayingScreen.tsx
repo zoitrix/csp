@@ -41,8 +41,8 @@ export function PlayingScreen({ escuchando, escena, loading, onTerminar, timeLef
         <div className={`indicadorEstadoVoz ${escuchando ? 'grabandoActivoPc' : ''}`}>
           <p className={styles.textoEstado}>
             {escuchando
-              ? 'El escenario esta abierto. Di el final en voz alta.'
-              : 'Finalizando grabacion de audio...'}
+              ? 'El escenario está abierto. Di el final en voz alta.'
+              : 'Finalizando grabación de audio...'}
           </p>
         </div>
       </div>

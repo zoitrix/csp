@@ -47,14 +47,14 @@ export function useEndController() {
     setPantalla('feedback');
 
     try {
-      setLoadingTexto('Escuchando tu grabacion con Whisper...');
+      setLoadingTexto('Escuchando tu grabación con Whisper...');
       const transcripcionFinal = await transcribirAudioFinal(audioBlob);
       setTextoUsuario(transcripcionFinal);
 
       const propuestaFinal = transcripcionFinal !== '' ? transcripcionFinal : '[SIN_RESPUESTA]';
       const tipoFinal = buscarTipoFinalPorId(tipoFinalIdRef.current);
 
-      setLoadingTexto('El Director esta evaluando tu final...');
+      setLoadingTexto('El Director está evaluando tu final...');
       const evaluacion = await evaluarFinalConDirector({
         escena: escenaRef.current,
         propuestaFinal,
@@ -105,7 +105,7 @@ export function useEndController() {
     const tiempo = tiempoConfigRef.current;
 
     if (tiempo <= 0) {
-      alert('Por favor, introduce un tiempo valido mayor a 0 segundos.');
+      alert('Por favor, introduce un tiempo válido mayor a 0 segundos.');
       return;
     }
 
@@ -129,7 +129,7 @@ export function useEndController() {
       await recorder.iniciarGrabacion();
     } catch (error) {
       console.error(error);
-      alert('Fallo en las luces. Revisa tu configuracion o tu API Key de Groq.');
+      alert('Fallo en las luces. Revisa tu configuración o tu API Key de Groq.');
       setPantalla('config');
     } finally {
       setLoading(false);

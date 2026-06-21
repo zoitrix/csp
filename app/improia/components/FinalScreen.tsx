@@ -4,7 +4,7 @@ import type { FaseActo, InformeDirector, MensajeChat, TipoIntervencion } from '.
 
 const ETIQUETAS_INTERVENCION: Record<TipoIntervencion, string> = {
   personaje: 'Personaje',
-  accion: 'Accion',
+  accion: 'Acción',
   narrador: 'Narrador',
   tiempo: 'Tiempo',
 };
@@ -24,7 +24,7 @@ export function FinalScreen({ historialLetra, informeFinal, onReiniciar, titulo 
       <div className={styles.teatroContainer}>
         <header className={styles.teatroHeader}>
           <h1>{aprobadosTotales ? '💐 ¡FUNCIÓN CONSEGUIDA! 🏆' : '🎬 FIN DE LA FUNCIÓN'}</h1>
-          <p className={styles.subtitulo}>Libreto Completo y Calificaciones</p>
+          <p className={styles.subtitulo}>Libreto completo y calificaciones</p>
         </header>
 
         <main className={styles.bloqueFeedback}>
@@ -75,7 +75,7 @@ function LibretoFinal({ historialLetra }: { historialLetra: MensajeChat[] }) {
               <strong style={{ color: mensaje.role === 'user' ? '#2980b9' : '#c0392b' }}>
                 {mensaje.role === 'user'
                   ? `👤 Tu (${ETIQUETAS_INTERVENCION[mensaje.tipo || 'personaje']}): `
-                  : '🤖 Co-Actor: '}
+                  : '🤖 Co-actor: '}
               </strong>
               {mensaje.content === '[SIN_RESPUESTA]' ? '...' : mensaje.content}
             </p>

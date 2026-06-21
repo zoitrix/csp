@@ -15,8 +15,8 @@ export default function EndPage() {
         <h1>🎭 Finales 🎬</h1>
         <p className={styles.subtitulo}>
           {controller.pantalla === 'config'
-            ? 'Elige como quieres cerrar la escena'
-            : 'Escucha el nudo y remata la funcion'}
+            ? 'Elige cómo quieres cerrar la escena'
+            : 'Escucha el nudo y remata la función'}
         </p>
       </header>
 

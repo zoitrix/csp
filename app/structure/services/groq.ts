@@ -3,12 +3,13 @@ import { ALUCINACIONES_WHISPER, TAMANO_MINIMO_VOZ } from '../constants';
 import { crearPromptDirector } from '../prompts';
 import type { DificultadImpro, EvaluacionDirector, FaseActo, ObraHistorial } from '../types';
 import { generarTituloComun } from '../../shared/titleGeneration';
+import { normalizarTextoVisible } from '../../shared/textEncoding';
 
 function crearClienteGroq(): OpenAI {
   const apiKey = process.env.NEXT_PUBLIC_API_KEY;
 
   if (!apiKey || apiKey.trim() === '') {
-    throw new Error('La API Key de Groq no esta configurada.');
+    throw new Error('La API Key de Groq no está configurada.');
   }
 
   return new OpenAI({
@@ -53,10 +54,10 @@ export async function transcribirAudioImpro(audioBlob: Blob | null): Promise<str
     model: 'whisper-large-v3',
     language: 'es',
     temperature: 0.0,
-    prompt: 'Teatro, actuacion, improvisacion en espanol con buena puntuacion.',
+    prompt: 'Teatro, actuación, improvisación en español con buena puntuación.',
   });
 
-  const transcripcion = respuestaWhisper.text?.trim() || '';
+  const transcripcion = normalizarTextoVisible(respuestaWhisper.text?.trim() || '');
   const normalizada = transcripcion.toLowerCase();
   const contieneBasura = ALUCINACIONES_WHISPER.some((frase) => normalizada.includes(frase));
 
@@ -87,6 +88,6 @@ export async function evaluarActoConDirector(params: {
 
   return {
     aprobado: !!objetoJSON.aprobado,
-    comentario: objetoJSON.comentario || 'Falta contundencia en la propuesta.',
+    comentario: normalizarTextoVisible(objetoJSON.comentario || 'Falta contundencia en la propuesta.'),
   };
 }

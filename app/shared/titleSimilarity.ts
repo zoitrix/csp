@@ -1,3 +1,5 @@
+import { normalizarTextoVisible } from './textEncoding';
+
 const PALABRAS_VACIAS = new Set([
   'a',
   'al',
@@ -45,7 +47,7 @@ const PALABRAS_VACIAS = new Set([
 ]);
 
 function normalizarTexto(texto: string): string {
-  return texto
+  return normalizarTextoVisible(texto)
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
@@ -151,5 +153,5 @@ export function crearAvisoVariedadTitulos(historial: string[]): string {
   const { palabrasVetadas } = crearRestriccionesVariedad(historial);
   const palabras = palabrasVetadas.length > 0 ? palabrasVetadas.join(', ') : 'ninguna todavia';
 
-  return `Palabras significativas ya gastadas que debes evitar: [${palabras}]. Cambia tambien la forma sintactica y la fuente del conflicto sin usar una lista cerrada de temas.`;
+  return `Palabras significativas ya gastadas que debes evitar: [${palabras}]. Cambia también la forma sintáctica y la fuente del conflicto sin usar una lista cerrada de temas.`;
 }

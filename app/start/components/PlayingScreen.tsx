@@ -21,7 +21,7 @@ export function PlayingScreen({ escuchando, estrategia, loading, onTerminar, tim
 
       <div className={styles.recuadroExplicativo} style={{ marginBottom: '15px', backgroundColor: 'rgba(255,255,255,0.05)' }}>
         <p>
-          <strong>Objetivo:</strong> Describe como empezarias la improvisacion usando la estrategia{' '}
+          <strong>Objetivo:</strong> Describe cómo empezarías la improvisación usando la estrategia{' '}
           <strong>{estrategia.tecnica}</strong>.
         </p>
         <p style={{ marginBottom: 0 }}>
@@ -33,8 +33,8 @@ export function PlayingScreen({ escuchando, estrategia, loading, onTerminar, tim
         <div className={`indicadorEstadoVoz ${escuchando ? 'grabandoActivoPc' : ''}`}>
           <p className={styles.textoEstado}>
             {escuchando
-              ? 'El escenario esta abierto. Explica tu arranque en voz alta.'
-              : 'Finalizando grabacion de audio...'}
+              ? 'El escenario está abierto. Explica tu arranque en voz alta.'
+              : 'Finalizando grabación de audio...'}
           </p>
         </div>
       </div>

@@ -3,12 +3,13 @@ import { ALUCINACIONES_WHISPER, TAMANO_MINIMO_VOZ } from '../../structure/consta
 import { crearPromptDirectorFinal, crearPromptEscenaFinal } from '../prompts';
 import type { DificultadEnd, EscenaFinal, EvaluacionDirector, TipoFinal } from '../types';
 import { generarTituloComun } from '../../shared/titleGeneration';
+import { normalizarTextoVisible } from '../../shared/textEncoding';
 
 function crearClienteGroq(): OpenAI {
   const apiKey = process.env.NEXT_PUBLIC_API_KEY;
 
   if (!apiKey || apiKey.trim() === '') {
-    throw new Error('La API Key de Groq no esta configurada.');
+    throw new Error('La API Key de Groq no está configurada.');
   }
 
   return new OpenAI({
@@ -190,7 +191,7 @@ function crearFallbackAnclado(titulo: string): Pick<EscenaFinal, 'planteamiento'
 
   return {
     planteamiento: limitarPalabras(
-      `En escena, dos trabajadores convierten "${tituloLimpio}" en una norma real que afecta directamente al publico y bloquea la situacion.`,
+      `En escena, dos trabajadores convierten "${tituloLimpio}" en una norma real que afecta directamente al público y bloquea la situación.`,
     ),
     nudo: limitarPalabras(
       `La autoridad del lugar exige cumplir la norma de inmediato, mientras alguien descubre una forma peligrosa de esquivarla.`,
@@ -220,8 +221,8 @@ export async function generarEscenaParaFinal(params: {
     const textoCrudo = response.choices[0]?.message?.content?.trim() || '{}';
     const objetoJSON = extraerObjetoJSON<Pick<EscenaFinal, 'planteamiento' | 'nudo'>>(textoCrudo);
     const contexto = {
-      planteamiento: limitarPalabras(objetoJSON.planteamiento || ''),
-      nudo: limitarPalabras(objetoJSON.nudo || ''),
+      planteamiento: limitarPalabras(normalizarTextoVisible(objetoJSON.planteamiento || '')),
+      nudo: limitarPalabras(normalizarTextoVisible(objetoJSON.nudo || '')),
     };
 
     if (
@@ -250,10 +251,10 @@ export async function transcribirAudioFinal(audioBlob: Blob | null): Promise<str
     model: 'whisper-large-v3',
     language: 'es',
     temperature: 0.0,
-    prompt: 'Teatro, actuacion, improvisacion en espanol con buena puntuacion.',
+    prompt: 'Teatro, actuación, improvisación en español con buena puntuación.',
   });
 
-  const transcripcion = respuestaWhisper.text?.trim() || '';
+  const transcripcion = normalizarTextoVisible(respuestaWhisper.text?.trim() || '');
   const normalizada = transcripcion.toLowerCase();
   const contieneBasura = ALUCINACIONES_WHISPER.some((frase) => normalizada.includes(frase));
 
@@ -283,6 +284,8 @@ export async function evaluarFinalConDirector(params: {
 
   return {
     aprobado: !!objetoJSON.aprobado,
-    comentario: objetoJSON.comentario || 'Falta un cierre mas claro, coherente y alineado con el tipo de final elegido.',
+    comentario: normalizarTextoVisible(
+      objetoJSON.comentario || 'Falta un cierre más claro, coherente y alineado con el tipo de final elegido.',
+    ),
   };
 }

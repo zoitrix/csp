@@ -24,7 +24,7 @@ export function ConfigScreen({
   return (
     <div className={styles.bloqueConfig}>
       <div className={styles.recuadroExplicativo}>
-        <div className={styles.tituloMision}>Mision de Estructuras</div>
+        <div className={styles.tituloMision}>Misión de Estructuras</div>
         {explicacionInicial}
       </div>
 
@@ -37,9 +37,9 @@ export function ConfigScreen({
             value={dificultad}
             onChange={(event) => onDificultadChange(event.target.value as DificultadImpro)}
           >
-            <option value="facil">Facil (Cotidiano)</option>
+            <option value="facil">Fácil (Cotidiano)</option>
             <option value="media">Medio (Interesante)</option>
-            <option value="dificil">Dificil (Locura)</option>
+            <option value="dificil">Difícil (Locura)</option>
           </select>
         </label>
 
@@ -65,14 +65,14 @@ export function ConfigScreen({
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginTop: '25px' }}>
         <button className={`${styles.btnTeatro} ${styles.btnComenzar}`} onClick={onIniciar} disabled={loading}>
-          {loading ? 'Afinando...' : 'Subir el Telon'}
+          {loading ? 'Afinando...' : 'Subir el Telón'}
         </button>
         <Link
           className={`${styles.btnTeatro} ${styles.btnRepetir}`}
           href="/"
           style={{ textAlign: 'center', textDecoration: 'none' }}
         >
-          Volver al menu
+          Volver al menú
         </Link>
       </div>
     </div>

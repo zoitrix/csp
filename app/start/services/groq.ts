@@ -5,6 +5,7 @@ import {
   generarTituloImpro as generarTituloStructure,
   transcribirAudioImpro as transcribirAudioStructure,
 } from '../../structure/services/groq';
+import { normalizarTextoVisible } from '../../shared/textEncoding';
 
 const PALABRAS_VACIAS_LITERALIDAD = new Set([
   'a',
@@ -39,7 +40,7 @@ function crearClienteGroq(): OpenAI {
   const apiKey = process.env.NEXT_PUBLIC_API_KEY;
 
   if (!apiKey || apiKey.trim() === '') {
-    throw new Error('La API Key de Groq no esta configurada.');
+    throw new Error('La API Key de Groq no está configurada.');
   }
 
   return new OpenAI({
@@ -169,7 +170,9 @@ export async function evaluarInicioConDirector(params: {
 
   const textoCrudo = response.choices[0]?.message?.content?.trim() || '{}';
   const objetoJSON = extraerEvaluacionDirector(textoCrudo);
-  const comentario = objetoJSON.comentario || 'Falta una entrada escenica mas concreta y alineada con la tecnica.';
+  const comentario = normalizarTextoVisible(
+    objetoJSON.comentario || 'Falta una entrada escénica más concreta y alineada con la técnica.',
+  );
   const tecnicaInsuficiente = comentarioIndicaTecnicaInsuficiente(comentario);
   const literalidadSatelite =
     params.estrategia.id === 'asociaciones-satelite' &&
@@ -178,7 +181,7 @@ export async function evaluarInicioConDirector(params: {
   return {
     aprobado: !!objetoJSON.aprobado && !tecnicaInsuficiente && !literalidadSatelite,
     comentario: literalidadSatelite
-      ? 'La introduccion es jugable, pero va al nucleo literal del titulo. Para Asociaciones Satelite necesitas arrancar desde una asociacion periferica.'
+      ? 'La introducción es jugable, pero va al núcleo literal del título. Para Asociaciones Satélite necesitas arrancar desde una asociación periférica.'
       : comentario,
   };
 }
