@@ -28,8 +28,10 @@ export default function GamesPage() {
             juegos={controller.juegos}
             loading={controller.loading}
             onIniciar={controller.iniciarJuego}
+            onObjetivoAyudasChange={controller.handleObjetivoAyudasChange}
             onJuegoChange={controller.setJuegoId}
             onTiempoChange={controller.handleTiempoChange}
+            objetivoAyudas={controller.objetivoAyudas}
             tiempoConfig={controller.tiempoConfig}
           />
         )}
@@ -43,6 +45,8 @@ export default function GamesPage() {
             loadingTexto={controller.loadingTexto}
             onTerminar={controller.terminarJuego}
             onTerminarFrase={controller.terminarFraseJugador}
+            ayudasResueltas={controller.ayudasResueltas}
+            objetivoAyudas={controller.objetivoAyudas}
             timeLeft={controller.timeLeft}
             turnos={controller.turnos}
           />

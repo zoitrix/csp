@@ -1,6 +1,8 @@
 import type { JuegoImpro } from './types';
 
 export const TIEMPO_JUEGO_INICIAL = 60;
+export const TIEMPO_PORTERO_INICIAL = 10;
+export const AYUDAS_PORTERO_INICIAL = 6;
 
 export const JUEGOS_IMPRO: JuegoImpro[] = [
   {
@@ -32,5 +34,20 @@ export const JUEGOS_IMPRO: JuegoImpro[] = [
       'Jugador: Ayer fui con mi novio a la montaña. IA: Fuimos con nuestros siete hijos. Jugador: Y con mis siete hijos, en la excursión, el menor desapareció.',
     pista:
       'Acepta la información nueva como si siempre hubiera formado parte de la historia. No la corrijas: incorpórala y avanza.',
+  },
+  {
+    id: 'el-portero',
+    nombre: 'El portero',
+    nivel: 'Nivel 1',
+    duracion: 'Duración larga',
+    categoria: 'Sí y adaptación',
+    objetivo:
+      'Responder rápida y afirmativamente, entrando en situación y personaje a partir de la propuesta del otro.',
+    reglas:
+      'La IA interpreta a un personaje con un problema. Responde en pocos segundos diciendo qué harías para resolverlo. Después llegará otro personaje con otra problemática.',
+    ejemplo:
+      'IA: Doctor, me duele muchísimo la espalda. Jugador: Le doy una pastilla, un masaje y le mando reposo. IA: Funcionaria, he perdido todos mis papeles.',
+    pista:
+      'Registra al personaje, toma una decisión rápida y juega a favor de la situación. No busques la solución perfecta: busca una respuesta útil y afirmativa.',
   },
 ];

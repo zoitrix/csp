@@ -1,6 +1,6 @@
 export type PantallaJuego = 'config' | 'jugando' | 'feedback';
 
-export type JuegoId = 'si-yo-fuera' | 'historia-interrumpida';
+export type JuegoId = 'si-yo-fuera' | 'historia-interrumpida' | 'el-portero';
 
 export type AutorTurno = 'jugador' | 'ia';
 
@@ -27,10 +27,18 @@ export interface TurnoJuego {
   reboteCorrecto: boolean;
 }
 
+export interface EvaluacionProblema {
+  problema: string;
+  respuesta: string;
+  adecuada: boolean;
+  comentario: string;
+}
+
 export interface EvaluacionJuego {
   aprobado: boolean;
   comentario: string;
   turnos: TurnoJuego[];
   turnosJugador: number;
   rebotesCorrectosJugador: number;
+  evaluacionesProblemas?: EvaluacionProblema[];
 }

@@ -2,7 +2,7 @@ import { OpenAI } from 'openai';
 import { normalizarTextoVisible } from '../../shared/textEncoding';
 import { transcribirAudioImpro } from '../../structure/services/groq';
 import { extraerUltimaPalabra, normalizarComparacion } from './analysis';
-import type { TurnoJuego } from '../types';
+import type { EvaluacionProblema, TurnoJuego } from '../types';
 
 function crearClienteGroq(): OpenAI {
   const apiKey = process.env.NEXT_PUBLIC_API_KEY;
@@ -31,6 +31,25 @@ function limpiarRespuesta(texto: string): string {
 
 function asegurarPuntoFinal(texto: string): string {
   return /[.!?]$/.test(texto) ? texto : `${texto}.`;
+}
+
+function extraerJsonObjeto(textoCrudo: string): Record<string, unknown> {
+  try {
+    return JSON.parse(textoCrudo);
+  } catch {
+    const inicio = textoCrudo.indexOf('{');
+    const fin = textoCrudo.lastIndexOf('}');
+
+    if (inicio === -1 || fin === -1 || fin <= inicio) {
+      return {};
+    }
+
+    try {
+      return JSON.parse(textoCrudo.slice(inicio, fin + 1));
+    } catch {
+      return {};
+    }
+  }
 }
 
 function crearPromptCompaneraSiYoFuera(palabra: string, historial: TurnoJuego[]): string {
@@ -130,4 +149,120 @@ export async function generarRespuestaHistoriaInterrumpida(params: {
   }
 
   return asegurarPuntoFinal(texto);
+}
+
+function crearPromptProblemaPortero(historial: TurnoJuego[]): string {
+  const problemasRecientes = historial
+    .filter((turno) => turno.autor === 'ia')
+    .slice(-6)
+    .map((turno) => turno.texto)
+    .join('\n');
+
+  return [
+    'Eres un personaje que llega ante el jugador en el juego teatral "El portero".',
+    'Plantea UNA problemática concreta y urgente en primera persona.',
+    'Debe poder resolverse con una acción rápida, afirmativa y creativa del jugador.',
+    'Cambia de personaje y de tipo de problema respecto a los recientes.',
+    'No expliques el juego. No incluyas la solución. Máximo 18 palabras.',
+    problemasRecientes ? `Problemas recientes que no debes repetir:\n${problemasRecientes}` : '',
+  ]
+    .filter(Boolean)
+    .join('\n');
+}
+
+export async function generarProblemaPortero(params: {
+  historial: TurnoJuego[];
+}): Promise<string> {
+  const groq = crearClienteGroq();
+  const response = await groq.chat.completions.create({
+    model: 'llama-3.1-8b-instant',
+    messages: [{ role: 'user', content: crearPromptProblemaPortero(params.historial) }],
+    temperature: 0.88,
+    max_tokens: 44,
+  });
+
+  const texto = limpiarRespuesta(response.choices[0]?.message?.content || '');
+
+  if (texto.length < 8) {
+    throw new Error('La problemática generada está vacía o es demasiado corta.');
+  }
+
+  return asegurarPuntoFinal(texto);
+}
+
+function emparejarProblemasYRespuestas(turnos: TurnoJuego[]): Array<{ problema: string; respuesta: string }> {
+  const pares: Array<{ problema: string; respuesta: string }> = [];
+
+  for (let i = 0; i < turnos.length; i += 1) {
+    const turno = turnos[i];
+
+    if (turno.autor !== 'ia') {
+      continue;
+    }
+
+    const respuesta = turnos.slice(i + 1).find((siguiente) => siguiente.autor === 'jugador');
+
+    if (respuesta) {
+      pares.push({ problema: turno.texto, respuesta: respuesta.texto });
+    }
+  }
+
+  return pares;
+}
+
+function crearPromptEvaluacionPortero(pares: Array<{ problema: string; respuesta: string }>): string {
+  const casos = pares
+    .map((par, index) => `${index + 1}. Problema: ${par.problema}\nRespuesta: ${par.respuesta}`)
+    .join('\n\n');
+
+  return [
+    'Evalúa respuestas del juego teatral "El portero".',
+    'Criterio: respuesta rápida, afirmativa, entra en rol, acepta el problema y propone una acción concreta que lo haga avanzar.',
+    'No exijas realismo perfecto: premia creatividad útil y decisión clara.',
+    `Debes devolver exactamente ${pares.length} evaluaciones, una por cada caso y en el mismo orden.`,
+    'Devuelve SOLO JSON válido con esta forma:',
+    '{"evaluaciones":[{"problema":"...","respuesta":"...","adecuada":true,"comentario":"máximo 18 palabras"}],"comentarioGlobal":"máximo 24 palabras"}',
+    `Casos:\n${casos}`,
+  ].join('\n');
+}
+
+export async function evaluarRespuestasPortero(params: {
+  turnos: TurnoJuego[];
+}): Promise<{ evaluaciones: EvaluacionProblema[]; comentarioGlobal: string }> {
+  const pares = emparejarProblemasYRespuestas(params.turnos);
+
+  if (pares.length === 0) {
+    return {
+      evaluaciones: [],
+      comentarioGlobal: 'No se han registrado respuestas suficientes para evaluar las problemáticas.',
+    };
+  }
+
+  const groq = crearClienteGroq();
+  const response = await groq.chat.completions.create({
+    model: 'llama-3.1-8b-instant',
+    messages: [{ role: 'user', content: crearPromptEvaluacionPortero(pares) }],
+    temperature: 0.2,
+    max_tokens: Math.min(1100, 220 + pares.length * 130),
+    response_format: { type: 'json_object' },
+  });
+
+  const objeto = extraerJsonObjeto(response.choices[0]?.message?.content || '{}');
+  const evaluacionesCrudas = Array.isArray(objeto.evaluaciones) ? objeto.evaluaciones : [];
+  const evaluaciones = pares.map((par, index) => {
+    const item = evaluacionesCrudas[index] ?? {};
+    const evaluacion = item as Partial<EvaluacionProblema>;
+
+    return {
+      problema: normalizarTextoVisible(String(evaluacion.problema || par.problema)),
+      respuesta: normalizarTextoVisible(String(evaluacion.respuesta || par.respuesta)),
+      adecuada: !!evaluacion.adecuada,
+      comentario: normalizarTextoVisible(String(evaluacion.comentario || 'Respuesta revisada.')),
+    };
+  });
+
+  return {
+    evaluaciones,
+    comentarioGlobal: normalizarTextoVisible(String(objeto.comentarioGlobal || 'Evaluación completada.')),
+  };
 }

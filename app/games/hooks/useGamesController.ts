@@ -1,10 +1,22 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { JUEGOS_IMPRO, TIEMPO_JUEGO_INICIAL } from '../constants';
-import { crearTurno, evaluarHistoriaInterrumpida, evaluarTurnosSiYoFuera } from '../services/analysis';
+import {
+  AYUDAS_PORTERO_INICIAL,
+  JUEGOS_IMPRO,
+  TIEMPO_JUEGO_INICIAL,
+  TIEMPO_PORTERO_INICIAL,
+} from '../constants';
+import {
+  crearTurno,
+  evaluarHistoriaInterrumpida,
+  evaluarPortero,
+  evaluarTurnosSiYoFuera,
+} from '../services/analysis';
 import { generarTurnoCompanera } from '../services/companion';
 import {
+  evaluarRespuestasPortero,
+  generarProblemaPortero,
   generarRespuestaCompaneraJuego,
   generarRespuestaHistoriaInterrumpida,
   transcribirAudioJuego,
@@ -19,6 +31,7 @@ const EVALUACION_INICIAL: EvaluacionJuego = {
   turnos: [],
   turnosJugador: 0,
   rebotesCorrectosJugador: 0,
+  evaluacionesProblemas: [],
 };
 
 function buscarJuegoPorId(id: JuegoId) {
@@ -33,9 +46,18 @@ function crearTurnoFallbackHistoria(): TurnoJuego {
   });
 }
 
+function crearTurnoFallbackPortero(): TurnoJuego {
+  return crearTurno({
+    autor: 'ia',
+    texto: 'Perdone, necesito ayuda urgente: mi maleta se ha abierto y he perdido los papeles.',
+    palabraEsperada: '',
+  });
+}
+
 export function useGamesController() {
-  const [juegoId, setJuegoId] = useState<JuegoId>(JUEGOS_IMPRO[0].id);
+  const [juegoId, setJuegoIdState] = useState<JuegoId>(JUEGOS_IMPRO[0].id);
   const [tiempoConfig, setTiempoConfig] = useState(TIEMPO_JUEGO_INICIAL);
+  const [objetivoAyudas, setObjetivoAyudas] = useState(AYUDAS_PORTERO_INICIAL);
   const [pantalla, setPantalla] = useState<PantallaJuego>('config');
   const [faseTurno, setFaseTurno] = useState<FaseTurnoJuego>('jugador');
   const [timeLeft, setTimeLeft] = useState(0);
@@ -48,6 +70,7 @@ export function useGamesController() {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const juegoIdRef = useRef(juegoId);
   const tiempoConfigRef = useRef(tiempoConfig);
+  const objetivoAyudasRef = useRef(objetivoAyudas);
   const timeLeftRef = useRef(timeLeft);
   const turnosRef = useRef<TurnoJuego[]>([]);
   const palabraEsperadaRef = useRef('');
@@ -65,6 +88,10 @@ export function useGamesController() {
   }, [tiempoConfig]);
 
   useEffect(() => {
+    objetivoAyudasRef.current = objetivoAyudas;
+  }, [objetivoAyudas]);
+
+  useEffect(() => {
     timeLeftRef.current = timeLeft;
   }, [timeLeft]);
 
@@ -76,10 +103,37 @@ export function useGamesController() {
     faseTurnoRef.current = faseTurno;
   }, [faseTurno]);
 
-  const finalizarPartida = useCallback((turnosFinales = turnosRef.current) => {
+  const finalizarPartida = useCallback(async (turnosFinales = turnosRef.current) => {
     partidaActivaRef.current = false;
     setPantalla('feedback');
     setFaseTurno('jugador');
+    setLoading(juegoIdRef.current === 'el-portero');
+    setLoadingTexto(juegoIdRef.current === 'el-portero' ? 'Evaluando tus soluciones...' : '');
+
+    if (juegoIdRef.current === 'el-portero') {
+      const evaluacionBase = evaluarPortero(turnosFinales);
+
+      try {
+        const evaluacionIA = await evaluarRespuestasPortero({ turnos: turnosFinales });
+        const adecuadas = evaluacionIA.evaluaciones.filter((item) => item.adecuada).length;
+
+        setEvaluacion({
+          ...evaluacionBase,
+          aprobado: evaluacionIA.evaluaciones.length > 0 && adecuadas >= Math.ceil(evaluacionIA.evaluaciones.length * 0.6),
+          comentario: evaluacionIA.comentarioGlobal,
+          evaluacionesProblemas: evaluacionIA.evaluaciones,
+        });
+      } catch (error) {
+        console.warn('No se pudo evaluar El portero con IA:', error);
+        setEvaluacion(evaluacionBase);
+      } finally {
+        setLoading(false);
+        setLoadingTexto('');
+      }
+
+      return;
+    }
+
     setLoading(false);
     setLoadingTexto('');
     setEvaluacion(
@@ -94,6 +148,48 @@ export function useGamesController() {
     onEnd: () => undefined,
   });
 
+  const hablarYEscuchar = useCallback((turnoIA: TurnoJuego, reiniciarTiempo: boolean) => {
+    vozCompanera.reproducirVoz(turnoIA.texto, () => {
+      if (!partidaActivaRef.current) {
+        return;
+      }
+
+      if (cerrarTrasTurnoRef.current) {
+        finalizarPartida(turnosRef.current);
+        return;
+      }
+
+      if (reiniciarTiempo) {
+        setTimeLeft(tiempoConfigRef.current);
+      }
+
+      setFaseTurno('jugador');
+      recorderRef.current?.iniciarGrabacion();
+    });
+  }, [finalizarPartida, vozCompanera]);
+
+  const generarSiguienteProblemaPortero = useCallback(async (historial: TurnoJuego[]) => {
+    setLoading(true);
+    setLoadingTexto('Llega un nuevo personaje con un problema...');
+
+    let turnoIA: TurnoJuego;
+
+    try {
+      const problema = await generarProblemaPortero({ historial });
+      turnoIA = crearTurno({ autor: 'ia', texto: problema, palabraEsperada: '' });
+    } catch (error) {
+      console.warn('Fallback local para El portero:', error);
+      turnoIA = crearTurnoFallbackPortero();
+    }
+
+    const turnosConProblema = [...historial, turnoIA];
+    setTurnos(turnosConProblema);
+    turnosRef.current = turnosConProblema;
+    setLoading(false);
+    setLoadingTexto('');
+    hablarYEscuchar(turnoIA, true);
+  }, [hablarYEscuchar]);
+
   const procesarTurnoJugador = useCallback(async (audioBlob: Blob | null) => {
     if (!partidaActivaRef.current) {
       return;
@@ -105,8 +201,9 @@ export function useGamesController() {
     try {
       setLoadingTexto('Escuchando tu frase...');
       const transcripcion = await transcribirAudioJuego(audioBlob);
+      const esPortero = juegoIdRef.current === 'el-portero';
 
-      if (!transcripcion.trim()) {
+      if (!transcripcion.trim() && !esPortero) {
         setLoading(false);
         setLoadingTexto('');
 
@@ -123,8 +220,8 @@ export function useGamesController() {
       const esHistoria = juegoIdRef.current === 'historia-interrumpida';
       const turnoJugador = crearTurno({
         autor: 'jugador',
-        texto: transcripcion,
-        palabraEsperada: esHistoria ? '' : palabraEsperadaRef.current,
+        texto: transcripcion.trim() || '[Sin respuesta]',
+        palabraEsperada: esHistoria || esPortero ? '' : palabraEsperadaRef.current,
       });
       const turnosConJugador = [...turnosRef.current, turnoJugador];
 
@@ -132,8 +229,24 @@ export function useGamesController() {
       setTurnos(turnosConJugador);
       turnosRef.current = turnosConJugador;
 
-      if (cerrarTrasTurnoRef.current || timeLeftRef.current <= 0 || (!esHistoria && !turnoJugador.ultimaPalabra)) {
+      if (
+        cerrarTrasTurnoRef.current ||
+        (!esPortero && timeLeftRef.current <= 0) ||
+        (!esHistoria && !esPortero && !turnoJugador.ultimaPalabra)
+      ) {
         finalizarPartida(turnosConJugador);
+        return;
+      }
+
+      if (esPortero) {
+        const ayudasResueltas = turnosConJugador.filter((turno) => turno.autor === 'jugador').length;
+
+        if (ayudasResueltas >= objetivoAyudasRef.current) {
+          finalizarPartida(turnosConJugador);
+          return;
+        }
+
+        await generarSiguienteProblemaPortero(turnosConJugador);
         return;
       }
 
@@ -167,25 +280,12 @@ export function useGamesController() {
       turnosRef.current = turnosConIA;
       setLoading(false);
       setLoadingTexto('');
-
-      vozCompanera.reproducirVoz(turnoIA.texto, () => {
-        if (!partidaActivaRef.current) {
-          return;
-        }
-
-        if (timeLeftRef.current <= 0 || cerrarTrasTurnoRef.current) {
-          finalizarPartida(turnosRef.current);
-          return;
-        }
-
-        setFaseTurno('jugador');
-        recorderRef.current?.iniciarGrabacion();
-      });
+      hablarYEscuchar(turnoIA, false);
     } catch (error) {
       console.error('Fallo en el juego:', error);
       finalizarPartida(turnosRef.current);
     }
-  }, [finalizarPartida, vozCompanera]);
+  }, [finalizarPartida, generarSiguienteProblemaPortero, hablarYEscuchar]);
 
   const recorder = useNativeRecorder(procesarTurnoJugador);
 
@@ -194,25 +294,42 @@ export function useGamesController() {
   }, [recorder]);
 
   useEffect(() => {
-    if (pantalla === 'jugando' && timeLeft > 0) {
+    const esPortero = juegoIdRef.current === 'el-portero';
+
+    if (pantalla === 'jugando' && timeLeft > 0 && (!esPortero || faseTurno === 'jugador')) {
       timerRef.current = setTimeout(() => setTimeLeft((prev) => prev - 1), 1000);
     } else if (timeLeft === 0 && pantalla === 'jugando') {
-      cerrarTrasTurnoRef.current = true;
-
-      if (faseTurnoRef.current === 'jugador') {
-        recorder.detenerGrabacion();
+      if (esPortero) {
+        if (faseTurnoRef.current === 'jugador') {
+          recorder.detenerGrabacion();
+        }
       } else {
-        finalizarPartida(turnosRef.current);
+        cerrarTrasTurnoRef.current = true;
+
+        if (faseTurnoRef.current === 'jugador') {
+          recorder.detenerGrabacion();
+        } else {
+          finalizarPartida(turnosRef.current);
+        }
       }
     }
 
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [finalizarPartida, pantalla, recorder, timeLeft]);
+  }, [faseTurno, finalizarPartida, pantalla, recorder, timeLeft]);
 
   const handleTiempoChange = useCallback((valor: number) => {
     setTiempoConfig(valor);
+  }, []);
+
+  const handleObjetivoAyudasChange = useCallback((valor: number) => {
+    setObjetivoAyudas(valor);
+  }, []);
+
+  const handleJuegoChange = useCallback((id: JuegoId) => {
+    setJuegoIdState(id);
+    setTiempoConfig(id === 'el-portero' ? TIEMPO_PORTERO_INICIAL : TIEMPO_JUEGO_INICIAL);
   }, []);
 
   const iniciarJuego = useCallback(async () => {
@@ -234,9 +351,15 @@ export function useGamesController() {
     setEvaluacion(EVALUACION_INICIAL);
 
     try {
-      setTimeLeft(tiempo);
-      setFaseTurno('jugador');
+      setTimeLeft(juegoIdRef.current === 'el-portero' ? 0 : tiempo);
+      setFaseTurno(juegoIdRef.current === 'el-portero' ? 'ia' : 'jugador');
       setPantalla('jugando');
+
+      if (juegoIdRef.current === 'el-portero') {
+        await generarSiguienteProblemaPortero([]);
+        return;
+      }
+
       await recorder.iniciarGrabacion();
     } catch (error) {
       console.error(error);
@@ -244,10 +367,12 @@ export function useGamesController() {
       partidaActivaRef.current = false;
       setPantalla('config');
     } finally {
-      setLoading(false);
-      setLoadingTexto('');
+      if (juegoIdRef.current !== 'el-portero') {
+        setLoading(false);
+        setLoadingTexto('');
+      }
     }
-  }, [recorder]);
+  }, [generarSiguienteProblemaPortero, recorder]);
 
   const terminarFraseJugador = useCallback(() => {
     if (faseTurnoRef.current !== 'jugador') {
@@ -279,11 +404,17 @@ export function useGamesController() {
     cerrarTrasTurnoRef.current = false;
     partidaActivaRef.current = true;
     setEvaluacion(EVALUACION_INICIAL);
-    setTimeLeft(tiempoConfigRef.current);
-    setFaseTurno('jugador');
+    setTimeLeft(juegoIdRef.current === 'el-portero' ? 0 : tiempoConfigRef.current);
+    setFaseTurno(juegoIdRef.current === 'el-portero' ? 'ia' : 'jugador');
     setPantalla('jugando');
+
+    if (juegoIdRef.current === 'el-portero') {
+      await generarSiguienteProblemaPortero([]);
+      return;
+    }
+
     setTimeout(() => recorder.iniciarGrabacion(), 100);
-  }, [recorder, vozCompanera]);
+  }, [generarSiguienteProblemaPortero, recorder, vozCompanera]);
 
   const reiniciarJuego = useCallback(() => {
     vozCompanera.cancelarVoz();
@@ -304,18 +435,21 @@ export function useGamesController() {
     juego: buscarJuegoPorId(juegoId),
     juegoId,
     juegos: JUEGOS_IMPRO,
+    ayudasResueltas: turnos.filter((turno) => turno.autor === 'jugador').length,
     handleTiempoChange,
+    handleObjetivoAyudasChange,
     iniciarJuego,
     loading,
     loadingTexto,
     pantalla,
     reiniciarJuego,
     reintentarJuego,
-    setJuegoId,
+    setJuegoId: handleJuegoChange,
     terminarFraseJugador,
     terminarJuego,
     textoUsuario,
     tiempoConfig,
+    objetivoAyudas,
     timeLeft,
     turnos,
   };

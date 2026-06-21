@@ -8,8 +8,10 @@ interface ConfigScreenProps {
   juegos: JuegoImpro[];
   loading: boolean;
   onIniciar: () => void;
+  onObjetivoAyudasChange: (valor: number) => void;
   onJuegoChange: (id: JuegoId) => void;
   onTiempoChange: (valor: number) => void;
+  objetivoAyudas: number;
   tiempoConfig: number;
 }
 
@@ -19,15 +21,19 @@ export function ConfigScreen({
   juegos,
   loading,
   onIniciar,
+  onObjetivoAyudasChange,
   onJuegoChange,
   onTiempoChange,
+  objetivoAyudas,
   tiempoConfig,
 }: ConfigScreenProps) {
+  const esPortero = juego.id === 'el-portero';
+
   return (
     <div className={styles.bloqueConfig}>
       <div className={styles.recuadroExplicativo}>
         <div className={styles.tituloMision}>Misión de juegos</div>
-        Selecciona una dinámica, configura el tiempo y juega en voz alta. El micrófono grabará tu partida para revisar después escucha, rebote y claridad.
+        Selecciona una dinámica, configura el tiempo y juega en voz alta. El micrófono grabará tu partida para revisar después escucha, adaptación y claridad.
       </div>
 
       <br />
@@ -58,16 +64,30 @@ export function ConfigScreen({
         </div>
 
         <label className={styles.labelStyle} style={{ display: 'flex', flexDirection: 'column', margin: 0 }}>
-          Tiempo de partida
+          {esPortero ? 'Tiempo por problemática' : 'Tiempo de partida'}
           <input
             type="number"
             className={styles.inputTiempoNumber}
             value={tiempoConfig}
-            min={10}
-            max={300}
+            min={esPortero ? 3 : 10}
+            max={esPortero ? 60 : 300}
             onChange={(event) => onTiempoChange(Number(event.target.value))}
           />
         </label>
+
+        {esPortero && (
+          <label className={styles.labelStyle} style={{ display: 'flex', flexDirection: 'column', margin: 0 }}>
+            Número de ayudas a superar
+            <input
+              type="number"
+              className={styles.inputTiempoNumber}
+              value={objetivoAyudas}
+              min={1}
+              max={30}
+              onChange={(event) => onObjetivoAyudasChange(Number(event.target.value))}
+            />
+          </label>
+        )}
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginTop: '25px' }}>

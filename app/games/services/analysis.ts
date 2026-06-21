@@ -206,3 +206,32 @@ export function evaluarHistoriaInterrumpida(turnos: TurnoJuego[]): EvaluacionJue
     rebotesCorrectosJugador: turnosJugador.length,
   };
 }
+
+export function evaluarPortero(turnos: TurnoJuego[]): EvaluacionJuego {
+  const turnosJugador = turnos.filter((turno) => turno.autor === 'jugador');
+  const problemas = turnos.filter((turno) => turno.autor === 'ia');
+
+  if (turnosJugador.length === 0) {
+    return {
+      aprobado: false,
+      comentario:
+        'No he detectado ninguna solución del jugador. Responde rápido con una acción concreta para resolver el problema.',
+      turnos,
+      turnosJugador: 0,
+      rebotesCorrectosJugador: 0,
+      evaluacionesProblemas: [],
+    };
+  }
+
+  return {
+    aprobado: turnosJugador.length >= 2,
+    comentario:
+      problemas.length >= 2
+        ? 'Has respondido a varias problemáticas. Revisa abajo si cada solución aceptó el rol y propuso una acción útil.'
+        : 'Has resuelto una problemática. Prueba con más rondas para entrenar rapidez y adaptación.',
+    turnos,
+    turnosJugador: turnosJugador.length,
+    rebotesCorrectosJugador: turnosJugador.length,
+    evaluacionesProblemas: [],
+  };
+}
