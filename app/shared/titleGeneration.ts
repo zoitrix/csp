@@ -1,8 +1,9 @@
 ﻿import { OpenAI } from 'openai';
 import { crearAvisoVariedadTitulos, tituloSePareceAHistorial } from './titleSimilarity';
 
-const INTENTOS_TITULO = 10;
-const MAX_TITULOS_HISTORIAL_PROMPT = 6;
+const INTENTOS_TITULO = 4;
+const MAX_TITULOS_HISTORIAL_PROMPT = 3;
+const CANDIDATOS_TITULO_POR_INTENTO = 3;
 
 const FORMAS_SINTACTICAS = [
   'pregunta',
@@ -52,6 +53,67 @@ const CIERRES_GRAMATICALES_DEBILES = new Set([
   'un',
   'una',
   'ya',
+]);
+
+const PALABRAS_COMUNES_CON_MAYUSCULA_INCORRECTA = new Set([
+  'alcalde',
+  'alcaldesa',
+  'abuelo',
+  'abuela',
+  'banco',
+  'bar',
+  'biblioteca',
+  'camarero',
+  'camarera',
+  'casa',
+  'colegio',
+  'consejo',
+  'director',
+  'directora',
+  'escuela',
+  'familia',
+  'fiesta',
+  'gobierno',
+  'hospital',
+  'jefe',
+  'jefa',
+  'junta',
+  'madre',
+  'mercado',
+  'ministro',
+  'ministra',
+  'oficina',
+  'padre',
+  'parque',
+  'presidente',
+  'presidenta',
+  'profesor',
+  'profesora',
+  'reunion',
+  'supermercado',
+  'teatro',
+  'tienda',
+  'vecino',
+  'vecina',
+  'vecinos',
+  'vecinas',
+]);
+
+const PALABRAS_DEFORMADAS_FRECUENTES = new Set([
+  'alcaldesaes',
+  'congresoa',
+  'congresar',
+  'consejio',
+  'diviertese',
+  'funerala',
+  'gobiernao',
+  'hospitala',
+  'juecesa',
+  'ministrao',
+  'presidento',
+  'ustede',
+  'ustedeses',
+  'vecindarioa',
 ]);
 
 function elegirFormaSintactica(): string {
@@ -109,27 +171,45 @@ function crearPromptTitulo(dificultad: string, titulos: string[]): string {
   const dificultadNormalizada = normalizarDificultad(dificultad).toUpperCase();
   const formaSintactica = elegirFormaSintactica();
 
-  return `Genera UN titulo de impro en espanol.
-Forma obligatoria: ${formaSintactica}.
-Dificultad ${dificultadNormalizada}: ${crearGuiaDificultadTitulo(dificultad)}
-Reglas:
-- 4 a 7 palabras.
-- Unidad gramatical con sentido real.
-- Concordancia obligatoria entre sujeto, verbo, genero y numero.
-- Si llamas a un grupo en plural, el verbo tambien debe ir en plural.
-- Comedia jugable, concreta, no poetica.
-- Espanol natural y oral: una persona podria decirlo en voz alta sin que suene roto.
-- Sin palabras inventadas, deformadas, truncadas, siglas, abreviaturas con puntos, spanglish, markdown, comillas, parentesis ni explicaciones.
-- Prohibido cerrar con cuantificadores mal encajados o muletillas que rompan la frase.
-- Prohibido escribir frases sobre el titulo o la forma: responde con el titulo final, no con una introduccion.
-- No fuerces la forma obligatoria si eso rompe la gramatica: prioriza una frase correcta y comprensible.
-- Solo mayuscula inicial o nombres propios.
-- No termines con palabra colgante.
-- Evita plantillas posesivas obvias.
-- No repitas titulos, palabras clave ni estructura reciente.
-Historial reciente: ${historialTitulos}.
+  return `Da ${CANDIDATOS_TITULO_POR_INTENTO} titulos de impro en espanol, uno por linea.
+Forma: ${formaSintactica}. Nivel ${dificultadNormalizada}: ${crearGuiaDificultadTitulo(dificultad)}
+Reglas: 4-7 palabras; frase completa, natural, logica y jugable; concordancia correcta; solo mayuscula inicial; sin nombres propios, siglas, comillas, markdown, palabras inventadas, "usted/ustedes", ni "se divierte a alguien".
+Evita estructuras y palabras recientes. Historial: ${historialTitulos}.
 ${avisoVariedad}
-Respuesta:`;
+Solo las ${CANDIDATOS_TITULO_POR_INTENTO} lineas:`;
+}
+
+function elegirTituloFallback(dificultad: string, titulos: string[], rechazados: string[]): string {
+  const dificultadNormalizada = normalizarDificultad(dificultad);
+  const titulosBase =
+    dificultadNormalizada === 'facil'
+      ? [
+          'La nevera exige vacaciones',
+          'El vecino guarda la luna',
+          'La mesa pide perdon',
+          'Los zapatos llegan tarde',
+        ]
+      : dificultadNormalizada === 'media'
+        ? [
+            'El barrio vota en pijama',
+            'La reunion prohibe los suspiros',
+            'Los clientes esconden la puerta',
+            'La familia subasta el silencio',
+          ]
+        : [
+            'El ascensor declara la independencia',
+            'La gravedad cancela los lunes',
+            'Los espejos convocan una huelga',
+            'El calendario demanda testigos',
+          ];
+
+  return (
+    titulosBase.find(
+      (titulo) =>
+        tituloTieneSentidoBasico(titulo) &&
+        !tituloSePareceAHistorial(titulo, [...titulos, ...rechazados]),
+    ) || titulosBase[0]
+  );
 }
 
 function tituloUsaPlantillaPersonalObvia(titulo: string): boolean {
@@ -160,6 +240,24 @@ function extraerPalabrasTitulo(titulo: string): string[] {
   return normalizarTituloParaValidacion(titulo).split(' ').filter(Boolean);
 }
 
+function tituloTieneMayusculasInternasInjustificadas(titulo: string): boolean {
+  const palabrasOriginales = titulo.split(/\s+/).filter(Boolean);
+
+  return palabrasOriginales.some((palabra, index) => {
+    if (index === 0) {
+      return false;
+    }
+
+    const limpia = palabra.replace(/[¿?¡!.,;:]/g, '');
+    const normalizada = limpia
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
+
+    return /^[A-ZÁÉÍÓÚÜÑ]/.test(limpia) && PALABRAS_COMUNES_CON_MAYUSCULA_INCORRECTA.has(normalizada);
+  });
+}
+
 function tituloEstaEnMayusculas(titulo: string): boolean {
   const letras = titulo
     .normalize('NFD')
@@ -174,7 +272,7 @@ function tituloTieneRepeticionTorpe(palabras: string[]): boolean {
 }
 
 function tituloTieneFormatoRoto(titulo: string): boolean {
-  return /(?:\b[\p{L}]\.){2,}/u.test(titulo) || /[\p{Ll}][\p{Lu}]/u.test(titulo);
+  return /[:;]/.test(titulo) || /(?:\b[\p{L}]\.){2,}/u.test(titulo) || /[\p{Ll}][\p{Lu}]/u.test(titulo);
 }
 
 function tituloTieneConcordanciaRota(titulo: string): boolean {
@@ -183,13 +281,45 @@ function tituloTieneConcordanciaRota(titulo: string): boolean {
   const cuantificadorMalEncajado =
     /\b(el|la|los|las)\s+\S+\s+se\s+(ha|han)\s+\S+(ado|ido|to|so|cho)\s+tod[oa]s?\b/.test(normalizado);
   const vocativoPluralConVerboSingular = /^[a-zñ]+s,\s+[a-zñ]+[ae]\b/.test(normalizado);
+  const reflexivoConDestinoImposible =
+    /\bse\s+(aburre|aburren|divierte|divierten|duerme|duermen|enfada|enfadan|rie|rien)\s+a\s+\S+/.test(
+      normalizado,
+    );
 
-  return cuantificadorMalEncajado || vocativoPluralConVerboSingular;
+  return cuantificadorMalEncajado || vocativoPluralConVerboSingular || reflexivoConDestinoImposible;
 }
 
 function tituloEsMetalinguistico(titulo: string): boolean {
   return /^(el|la|un|una)?\s*(titulo|titular|frase|respuesta|propuesta)\s+(puede|podria|debe|seria|es)\s+/i.test(
     normalizarTituloParaValidacion(titulo),
+  );
+}
+
+function tituloTieneTratamientoRoto(titulo: string): boolean {
+  const normalizado = normalizarTituloParaValidacion(titulo);
+
+  return /\busted(e|es)?\b/.test(normalizado) || /\ba\s+usted(?:e|es)?\b/.test(normalizado);
+}
+
+function tituloTienePalabraDeformada(palabras: string[]): boolean {
+  return palabras.some((palabra) => {
+    if (PALABRAS_DEFORMADAS_FRECUENTES.has(palabra)) {
+      return true;
+    }
+
+    return (
+      /^congres[a-zñ]+$/.test(palabra) &&
+      !['congreso', 'congresos', 'congresista', 'congresistas'].includes(palabra)
+    );
+  });
+}
+
+function tituloTieneBaseLogicaDebil(titulo: string): boolean {
+  const normalizado = normalizarTituloParaValidacion(titulo);
+
+  return (
+    /\b(algo|cosa|tema|asunto|situacion)\s+(raro|rara|curioso|curiosa|extrano|extrana)\b/.test(normalizado) ||
+    /\b(se\s+)?(divierte|divierten|entretiene|entretienen)\s+(a|de|con)\s+(usted|ustedes|ustede)\b/.test(normalizado)
   );
 }
 
@@ -207,8 +337,12 @@ function tituloTieneSentidoBasico(titulo: string): boolean {
 
   if (
     tituloTieneRepeticionTorpe(palabras) ||
+    tituloTieneMayusculasInternasInjustificadas(titulo) ||
     tituloTieneFormatoRoto(titulo) ||
     tituloTieneConcordanciaRota(titulo) ||
+    tituloTieneTratamientoRoto(titulo) ||
+    tituloTienePalabraDeformada(palabras) ||
+    tituloTieneBaseLogicaDebil(titulo) ||
     tituloEsMetalinguistico(titulo)
   ) {
     return false;
@@ -237,12 +371,7 @@ function normalizarMayusculasTitulo(titulo: string): string {
 }
 
 function limpiarTituloGenerado(textoCrudo: string): string {
-  const primeraLinea = textoCrudo
-    .split(/\r?\n/)
-    .map((linea) => linea.trim())
-    .find(Boolean) || '';
-
-  const sinPrefijo = primeraLinea.replace(
+  const sinPrefijo = textoCrudo.replace(
     /^(?:aqui tienes(?: una frase| un titulo)?|(?:el|la|un|una)?\s*(?:frase final|frase|titulo|titular|propuesta|respuesta)\s+(?:puede|podria|debe|seria|es)\s*:?\s*|frase final|frase|titulo|titular|propuesta|respuesta)\s*:\s*/i,
     '',
   );
@@ -257,18 +386,26 @@ function limpiarTituloGenerado(textoCrudo: string): string {
     .replace(/^(.+)$/, normalizarMayusculasTitulo);
 }
 
+function extraerTitulosGenerados(textoCrudo: string): string[] {
+  return textoCrudo
+    .split(/\r?\n/)
+    .map((linea) => linea.replace(/^\s*(?:[-*]|\d+[.)])\s*/, '').trim())
+    .map(limpiarTituloGenerado)
+    .filter(Boolean);
+}
+
 function getTemperaturaTitulo(dificultad: string): number {
   const dificultadNormalizada = normalizarDificultad(dificultad);
 
   if (dificultadNormalizada === 'facil') {
-    return 0.85;
+    return 0.65;
   }
 
   if (dificultadNormalizada === 'media') {
-    return 1.0;
+    return 0.8;
   }
 
-  return 1.1;
+  return 0.95;
 }
 
 export async function generarTituloComun(dificultad: string, titulos: string[]): Promise<string> {
@@ -281,36 +418,38 @@ export async function generarTituloComun(dificultad: string, titulos: string[]):
     const response = await groq.chat.completions.create({
       model: 'llama-3.1-8b-instant',
       messages: [{ role: 'user', content: crearPromptTitulo(dificultad, historialParaPrompt) }],
-      temperature: Math.min(getTemperaturaTitulo(dificultad) + intento * 0.15, 1.2),
+      temperature: Math.min(getTemperaturaTitulo(dificultad) + intento * 0.08, 1.05),
       presence_penalty: 0.7,
       frequency_penalty: 0.5,
-      max_tokens: 20,
+      max_tokens: 45,
     });
 
-    const titulo = limpiarTituloGenerado(response.choices[0]?.message?.content?.trim() || '');
+    const candidatos = extraerTitulosGenerados(response.choices[0]?.message?.content?.trim() || '');
 
-    if (!titulo) {
+    if (candidatos.length === 0) {
       continue;
     }
 
-    if (!mejorTitulo && tituloTieneSentidoBasico(titulo)) {
-      mejorTitulo = titulo;
-    }
+    for (const titulo of candidatos) {
+      if (!mejorTitulo && tituloTieneSentidoBasico(titulo)) {
+        mejorTitulo = titulo;
+      }
 
-    if (
-      tituloTieneSentidoBasico(titulo) &&
-      !tituloUsaPlantillaPersonalObvia(titulo) &&
-      !tituloSePareceAHistorial(titulo, titulos)
-    ) {
-      return titulo;
-    }
+      if (
+        tituloTieneSentidoBasico(titulo) &&
+        !tituloUsaPlantillaPersonalObvia(titulo) &&
+        !tituloSePareceAHistorial(titulo, titulos)
+      ) {
+        return titulo;
+      }
 
-    rechazados.push(titulo);
+      rechazados.push(titulo);
+    }
   }
 
   if (mejorTitulo) {
     return mejorTitulo;
   }
 
-  throw new Error('No se pudo generar un titulo valido: ' + rechazados.join(' | '));
+  return elegirTituloFallback(dificultad, titulos, rechazados);
 }

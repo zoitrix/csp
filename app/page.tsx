@@ -36,8 +36,8 @@ export default function HomePage() {
   return (
     <main className={styles.teatroContainer}>
       <header className={styles.teatroHeader}>
-        <h1>Impro Trainer</h1> 
-        <p className={styles.subtitulo}>Elige tu escenario de entrenamiento (v0.27)</p>
+        <h1>Impro TrAIner</h1> 
+        <p className={styles.subtitulo}>Elige tu escenario de entrenamiento (v0.28)</p>
       </header>
 
       <section className={styles.escenario} aria-label="Menu principal">

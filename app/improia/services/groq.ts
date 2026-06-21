@@ -4,6 +4,8 @@ import { crearPromptCoactor, crearPromptDirector } from '../prompts';
 import type { DificultadChat, EvaluacionActo, FaseActo, MensajeChat } from '../types';
 import { generarTituloComun } from '../../shared/titleGeneration';
 
+const MAX_MENSAJES_MODELO = 10;
+
 function crearClienteGroq(): OpenAI {
   const apiKey = process.env.NEXT_PUBLIC_API_KEY;
 
@@ -157,9 +159,9 @@ function extraerEvaluacionDirector(textoCrudo: string): Partial<EvaluacionActo> 
 }
 
 function crearMensajesModelo(historial: MensajeChat[]) {
-  return historial.map((mensaje) => ({
+  return historial.slice(-MAX_MENSAJES_MODELO).map((mensaje) => ({
     role: mensaje.role,
-    content: mensaje.content,
+    content: mensaje.content.replace(/\s+/g, ' ').trim().slice(0, 280),
   }));
 }
 
@@ -198,7 +200,7 @@ export async function generarReplicaCoactor(historial: MensajeChat[]): Promise<s
       ...crearMensajesModelo(historial),
     ],
     temperature: 0.6,
-    max_tokens: 140,
+    max_tokens: 95,
   });
 
   return response.choices[0]?.message?.content?.trim() || 'Continua, te escucho.';
@@ -216,7 +218,7 @@ export async function evaluarActoDirector(params: {
     model: 'llama-3.1-8b-instant',
     messages: [{ role: 'user', content: crearPromptDirector(params) }],
     temperature: 0.1,
-    max_tokens: 320,
+    max_tokens: 160,
     response_format: { type: 'json_object' },
   });
 

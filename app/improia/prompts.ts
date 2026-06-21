@@ -1,5 +1,9 @@
 import type { FaseActo, MensajeChat, TipoIntervencion } from './types';
 
+const MAX_MENSAJES_MODELO = 10;
+const MAX_MENSAJES_DIRECTOR = 12;
+const MAX_CARACTERES_INTERVENCION = 260;
+
 const ETIQUETAS_INTERVENCION: Record<TipoIntervencion, string> = {
   personaje: 'PERSONAJE',
   accion: 'ACCION',
@@ -11,54 +15,40 @@ function etiquetaIntervencion(tipo?: TipoIntervencion): string {
   return tipo ? ETIQUETAS_INTERVENCION[tipo] : 'PERSONAJE';
 }
 
-function crearLibretoAnotado(historial: MensajeChat[]): string {
+function limitarTextoIntervencion(texto: string): string {
+  const limpio = texto.replace(/\s+/g, ' ').trim();
+
+  if (limpio.length <= MAX_CARACTERES_INTERVENCION) {
+    return limpio;
+  }
+
+  return `${limpio.slice(0, MAX_CARACTERES_INTERVENCION).replace(/[\s,;:.]+$/g, '')}...`;
+}
+
+function tomarContextoReciente(historial: MensajeChat[], maxMensajes: number): MensajeChat[] {
+  return historial.slice(-maxMensajes);
+}
+
+function crearLibretoAnotado(historial: MensajeChat[], maxMensajes = MAX_MENSAJES_DIRECTOR): string {
   return historial
+    .slice(-maxMensajes)
     .map((mensaje) => {
       const autor = mensaje.role === 'user' ? 'ACTOR (Usuario)' : 'CO-ACTOR (IA)';
-      return `${autor} [${etiquetaIntervencion(mensaje.tipo)}]: ${mensaje.content}`;
+      return `${autor} [${etiquetaIntervencion(mensaje.tipo)}]: ${limitarTextoIntervencion(mensaje.content)}`;
     })
     .join('\n');
 }
 
 export function crearPromptCoactor(historial: MensajeChat[]): string {
-  const libretoAnotado = crearLibretoAnotado(historial);
+  const historialReciente = tomarContextoReciente(historial, MAX_MENSAJES_MODELO);
+  const libretoAnotado = crearLibretoAnotado(historialReciente, MAX_MENSAJES_MODELO);
 
-  return `ERES UN ACTOR DE IMPROVISACION Y GUARDIAN DEL GUION:
-- TU MEMORIA ES LA ESCENA: Debes leer TODO el libreto anotado para decidir como continuar.
-- INTEGRACION TOTAL: Tu respuesta debe conectar logica y narrativamente con los eventos ocurridos.
-- MANTEN EL HILO: Si algo se menciono hace 5 turnos, sigue siendo real y debe afectar tu decision actual.
-- ESTILO: Puedes hablar como personaje, realizar una accion fisica, narrar atmosfera o hacer una transicion temporal.
-- HUMOR: Se ingenioso pero coherente con el tono absurdo o realista establecido.
-- NATURALIDAD: Responde como companero de escena, no como asistente.
+  return `Eres co-actor de improvisacion. Continua la escena aceptando lo ultimo, conservando lugar/reglas/conflictos recientes y respondiendo como personaje, accion, narrador o salto temporal.
 
-TIPOS DE INTERVENCION DEL ACTOR:
-- PERSONAJE: dialogo en primera persona. Responde desde dentro de la escena.
-- ACCION: accion fisica de su personaje. Reacciona corporalmente y dale consecuencia.
-- NARRADOR: descripcion literaria o atmosferica. Integra ese ambiente sin discutirlo.
-- TIEMPO: salto temporal, elipsis o flashback. Aterriza la nueva situacion con claridad.
-
-LIBRETO ANOTADO:
+LIBRETO RECIENTE:
 ${libretoAnotado || 'La escena aun no ha empezado.'}
 
-REGLAS DE ORO:
-1. "Si, y...": Acepta lo anterior y anade una consecuencia logica.
-2. Accion-Reaccion: Responde al contenido emocional y factual del usuario, no ignores sus propuestas previas.
-3. Coherencia Absurda: Si el usuario fija un lugar, una regla o un hecho escenico, sigue siendo real.
-4. Co-direccion: Si el usuario usa ACCION, NARRADOR o TIEMPO, obedecelo y continua desde ahi sin corregirlo.
-5. Las entradas ACCION, NARRADOR y TIEMPO del usuario son contexto escenico acumulado, no frases a las que debas contestar directamente.
-6. Cuando el usuario vuelva a PERSONAJE, responde a ese dialogo teniendo en cuenta todas sus acciones, narraciones y saltos temporales previos.
-
-FORMATO OBLIGATORIO:
-- Puedes usar uno o dos bloques breves, cada uno en una linea distinta.
-- Dialogo del co-actor: empieza con "PERSONAJE:" y escribe en primera persona.
-- Accion fisica del co-actor: empieza con "ACCION:" y escribe la accion entre corchetes.
-- Las acciones del co-actor son acotaciones escritas, no dialogo pronunciado.
-- Narrador o direccion atmosferica: empieza con "NARRADOR:".
-- Transicion temporal: empieza con "TIEMPO:" y aterriza la elipsis o flashback.
-- No mezcles dialogo y accion en la misma linea: separalos en PERSONAJE y ACCION.
-- No uses etiquetas entre corchetes como "[Narrador]"; las etiquetas validas son PERSONAJE, ACCION, NARRADOR y TIEMPO.
-- MAXIMO 70 PALABRAS.
-- No expliques el formato ni des consejos al usuario.`;
+Formato: 1 o 2 lineas, maximo 55 palabras. Etiquetas validas: PERSONAJE:, ACCION:, NARRADOR:, TIEMPO:. No expliques nada ni des consejos.`;
 }
 
 export function crearConsignasDirector(fase: FaseActo, titulo: string): string {
@@ -97,24 +87,23 @@ export function crearPromptDirector(params: {
   titulo: string;
   historial: MensajeChat[];
 }): string {
-  const libretoCompleto = crearLibretoAnotado(params.historial);
-  const lineasActor = params.historial
+  const historialReciente = tomarContextoReciente(params.historial, MAX_MENSAJES_DIRECTOR);
+  const libretoCompleto = crearLibretoAnotado(historialReciente);
+  const lineasActor = historialReciente
     .filter((mensaje) => mensaje.role === 'user')
-    .map((mensaje) => `ACTOR (Usuario) [${etiquetaIntervencion(mensaje.tipo)}]: ${mensaje.content}`)
+    .map((mensaje) => `ACTOR (Usuario) [${etiquetaIntervencion(mensaje.tipo)}]: ${limitarTextoIntervencion(mensaje.content)}`)
     .join('\n');
-  const lineasCoactor = params.historial
+  const lineasCoactor = historialReciente
     .filter((mensaje) => mensaje.role === 'assistant')
-    .map((mensaje) => `CO-ACTOR (IA) [${etiquetaIntervencion(mensaje.tipo)}]: ${mensaje.content}`)
+    .map((mensaje) => `CO-ACTOR (IA) [${etiquetaIntervencion(mensaje.tipo)}]: ${limitarTextoIntervencion(mensaje.content)}`)
     .join('\n');
 
   return `
 [ROL]
-Eres un Director de teatro de improvisacion hiperactivo, tecnico, apasionado y muy exigente. Hablas siempre utilizando jerga teatral.
+Eres Director de improvisacion. Evalua con criterio tecnico y breve.
 
 [MISION DE ANALISIS]
-Tu unico trabajo es juzgar si el desempeno del ACTOR (Usuario) dentro de la obra completa cumple con el criterio tecnico solicitado.
-
-Evalua su coherencia, su capacidad de propuesta, escucha y adaptacion al juego dramatico basandote en el [LIBRETO REAL DE LA OBRA]. El titulo y el hilo conversacional son contextos fijos. Juzga al ACTOR, no al co-actor IA.
+Juzga solo si el ACTOR (Usuario) cumple el criterio de la fase actual. El titulo y el co-actor son contexto; no evalues al co-actor.
 
 [CONSIGNAS ESPECIFICAS PARA ESTE CRITERIO]
 ${crearConsignasDirector(params.fase, params.titulo)}
@@ -122,7 +111,7 @@ ${crearConsignasDirector(params.fase, params.titulo)}
 [DATOS DE ENTRADA DE LA ESCENA]
 <titulo_escena_context>${params.titulo}</titulo_escena_context>
 
-[LIBRETO REAL DE LA OBRA]
+[LIBRETO RECIENTE]
 ${libretoCompleto || 'El actor no ha intervenido.'}
 
 [LINEAS DEL ACTOR A EVALUAR]
@@ -141,15 +130,14 @@ ${lineasCoactor || 'El co-actor no ha intervenido.'}
 - Un desenlace solo puede aprobar si hay cierre, no solo escalada.
 
 [CALIDAD DEL COMENTARIO]
-- El comentario debe tener entre 70 y 110 palabras.
-- Debe mencionar al menos dos detalles concretos del dialogo: objetos, lugares, decisiones, frases, problemas o giros que hayan aparecido.
-- No escribas una frase generica que podria valer para cualquier obra.
-- Explica brevemente por que aprueba o rechaza este criterio y que faltaria mejorar.
+- Maximo 55 palabras.
+- Menciona al menos un detalle concreto del dialogo.
+- Explica por que aprueba o rechaza y que faltaria mejorar.
 
 [FORMATO DE SALIDA ESTRICTO]
 Devuelve EXCLUSIVAMENTE un objeto JSON con esta estructura exacta:
 {
   "aprobado": true o false,
-  "comentario": "Critica teatral de 70 a 110 palabras, con detalles concretos del dialogo."
+  "comentario": "Critica teatral breve con detalles concretos."
 }`;
 }
