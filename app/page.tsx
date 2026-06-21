@@ -24,9 +24,16 @@ const menuItems = [
     action: 'Practicar finales',
   },
   {
-    title: '🚧ImprovIA🚧',
+    title: 'Juegos',
     description:
-      '¡El gran reto! Comparte escena con un co-actor vIArtual y desarrolla tu propia historia.',
+      'Juega a diferentes dinámicas para practicar los pilares básicos de la improvisación.',
+    href: '/games',
+    action: 'Jugar ahora',
+  },
+  {
+    title: 'ImprovIA',
+    description:
+      '¡El gran reto! Comparte escena con un coactor vIArtual y desarrolla tu propia historia.',
     href: '/improia',
     action: 'Improvisar ahora',
   },
@@ -36,8 +43,8 @@ export default function HomePage() {
   return (
     <main className={styles.teatroContainer}>
       <header className={styles.teatroHeader}>
-        <h1>Impro TrAIner</h1> 
-        <p className={styles.subtitulo}>Elige tu escenario de entrenamiento (v0.29)</p>
+        <h1>Impro TrAIner</h1>
+        <p className={styles.subtitulo}>Elige tu escenario de entrenamiento (v0.30)</p>
       </header>
 
       <section className={styles.escenario} aria-label="Menú principal">
