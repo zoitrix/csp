@@ -13,17 +13,30 @@ interface PlayingScreenProps {
   turnos: TurnoJuego[];
 }
 
-function textoEstadoTurno(faseTurno: FaseTurnoJuego, escuchando: boolean, loadingTexto: string): string {
+function textoEstadoTurno(
+  faseTurno: FaseTurnoJuego,
+  escuchando: boolean,
+  loadingTexto: string,
+  esHistoria: boolean,
+): string {
   if (faseTurno === 'procesando') {
     return loadingTexto || 'Procesando tu frase...';
   }
 
   if (faseTurno === 'ia') {
-    return 'La compañera IA está respondiendo. Escucha su última palabra.';
+    return esHistoria
+      ? 'La compañera IA está continuando la historia. Escucha su propuesta.'
+      : 'La compañera IA está respondiendo. Escucha su última palabra.';
+  }
+
+  if (esHistoria) {
+    return escuchando
+      ? 'Tu turno. Acepta lo último que dijo la IA y continúa la historia.'
+      : 'Preparando tu micrófono...';
   }
 
   return escuchando
-    ? 'Tu turno. Di una frase completa que empiece por "Si yo fuera...".'
+    ? 'Tu turno. Di una frase completa que empiece por "Si yo fuera..." o "Si yo fuese...".'
     : 'Preparando tu micrófono...';
 }
 
@@ -38,6 +51,7 @@ export function PlayingScreen({
   timeLeft,
   turnos,
 }: PlayingScreenProps) {
+  const esHistoria = juego.id === 'historia-interrumpida';
   const ultimoTurno = turnos[turnos.length - 1];
   const ultimaPalabra = ultimoTurno?.ultimaPalabra || '';
 
@@ -54,12 +68,25 @@ export function PlayingScreen({
           <strong>Turno actual:</strong>{' '}
           {faseTurno === 'jugador' ? 'Jugador' : faseTurno === 'ia' ? 'Compañera IA' : 'Procesando'}
         </p>
-        <p>
-          <strong>Regla:</strong> cada frase empieza por "Si yo fuera..." y toma la última palabra de la intervención anterior.
-        </p>
-        <p style={{ marginBottom: 0 }}>
-          <strong>Última palabra:</strong> {ultimaPalabra || 'empieza libremente'}
-        </p>
+        {esHistoria ? (
+          <>
+            <p>
+              <strong>Regla:</strong> el jugador inicia la historia, la IA añade una frase y el jugador acepta esa propuesta para seguir.
+            </p>
+            <p style={{ marginBottom: 0 }}>
+              <strong>Impulso:</strong> continúa la narración anterior sin corregirla.
+            </p>
+          </>
+        ) : (
+          <>
+            <p>
+              <strong>Regla:</strong> cada frase empieza por "Si yo fuera..." o "Si yo fuese..." y toma la última palabra de la intervención anterior.
+            </p>
+            <p style={{ marginBottom: 0 }}>
+              <strong>Última palabra:</strong> {ultimaPalabra || 'empieza libremente'}
+            </p>
+          </>
+        )}
       </div>
 
       {turnos.length > 0 && (
@@ -74,7 +101,7 @@ export function PlayingScreen({
 
       <div className={styles.formularioTextoWrapper} style={{ textAlign: 'center' }}>
         <div className={`indicadorEstadoVoz ${escuchando ? 'grabandoActivoPc' : ''}`}>
-          <p className={styles.textoEstado}>{textoEstadoTurno(faseTurno, escuchando, loadingTexto)}</p>
+          <p className={styles.textoEstado}>{textoEstadoTurno(faseTurno, escuchando, loadingTexto, esHistoria)}</p>
         </div>
       </div>
 

@@ -2,9 +2,13 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { JUEGOS_IMPRO, TIEMPO_JUEGO_INICIAL } from '../constants';
-import { crearTurno, evaluarTurnosSiYoFuera } from '../services/analysis';
+import { crearTurno, evaluarHistoriaInterrumpida, evaluarTurnosSiYoFuera } from '../services/analysis';
 import { generarTurnoCompanera } from '../services/companion';
-import { transcribirAudioJuego } from '../services/groq';
+import {
+  generarRespuestaCompaneraJuego,
+  generarRespuestaHistoriaInterrumpida,
+  transcribirAudioJuego,
+} from '../services/groq';
 import type { EvaluacionJuego, FaseTurnoJuego, JuegoId, PantallaJuego, TurnoJuego } from '../types';
 import { useSpeechSynthesisActor } from '../../improia/hooks/useSpeechSynthesisActor';
 import { useNativeRecorder } from '../../structure/hooks/useNativeRecorder';
@@ -21,6 +25,14 @@ function buscarJuegoPorId(id: JuegoId) {
   return JUEGOS_IMPRO.find((juego) => juego.id === id) ?? JUEGOS_IMPRO[0];
 }
 
+function crearTurnoFallbackHistoria(): TurnoJuego {
+  return crearTurno({
+    autor: 'ia',
+    texto: 'Entonces apareció un nuevo problema que nos obligó a cambiar de plan.',
+    palabraEsperada: '',
+  });
+}
+
 export function useGamesController() {
   const [juegoId, setJuegoId] = useState<JuegoId>(JUEGOS_IMPRO[0].id);
   const [tiempoConfig, setTiempoConfig] = useState(TIEMPO_JUEGO_INICIAL);
@@ -34,6 +46,7 @@ export function useGamesController() {
   const [evaluacion, setEvaluacion] = useState<EvaluacionJuego>(EVALUACION_INICIAL);
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const juegoIdRef = useRef(juegoId);
   const tiempoConfigRef = useRef(tiempoConfig);
   const timeLeftRef = useRef(timeLeft);
   const turnosRef = useRef<TurnoJuego[]>([]);
@@ -42,6 +55,10 @@ export function useGamesController() {
   const faseTurnoRef = useRef<FaseTurnoJuego>('jugador');
   const partidaActivaRef = useRef(false);
   const recorderRef = useRef<ReturnType<typeof useNativeRecorder> | null>(null);
+
+  useEffect(() => {
+    juegoIdRef.current = juegoId;
+  }, [juegoId]);
 
   useEffect(() => {
     tiempoConfigRef.current = tiempoConfig;
@@ -65,7 +82,11 @@ export function useGamesController() {
     setFaseTurno('jugador');
     setLoading(false);
     setLoadingTexto('');
-    setEvaluacion(evaluarTurnosSiYoFuera(turnosFinales));
+    setEvaluacion(
+      juegoIdRef.current === 'historia-interrumpida'
+        ? evaluarHistoriaInterrumpida(turnosFinales)
+        : evaluarTurnosSiYoFuera(turnosFinales),
+    );
   }, []);
 
   const vozCompanera = useSpeechSynthesisActor({
@@ -90,19 +111,20 @@ export function useGamesController() {
         setLoadingTexto('');
 
         if (cerrarTrasTurnoRef.current || timeLeftRef.current <= 0) {
-        finalizarPartida();
-        return;
-      }
+          finalizarPartida();
+          return;
+        }
 
-      setFaseTurno('jugador');
+        setFaseTurno('jugador');
         setTimeout(() => recorderRef.current?.iniciarGrabacion(), 150);
         return;
       }
 
+      const esHistoria = juegoIdRef.current === 'historia-interrumpida';
       const turnoJugador = crearTurno({
         autor: 'jugador',
         texto: transcripcion,
-        palabraEsperada: palabraEsperadaRef.current,
+        palabraEsperada: esHistoria ? '' : palabraEsperadaRef.current,
       });
       const turnosConJugador = [...turnosRef.current, turnoJugador];
 
@@ -110,16 +132,37 @@ export function useGamesController() {
       setTurnos(turnosConJugador);
       turnosRef.current = turnosConJugador;
 
-      if (cerrarTrasTurnoRef.current || timeLeftRef.current <= 0 || !turnoJugador.ultimaPalabra) {
+      if (cerrarTrasTurnoRef.current || timeLeftRef.current <= 0 || (!esHistoria && !turnoJugador.ultimaPalabra)) {
         finalizarPartida(turnosConJugador);
         return;
       }
 
-      setLoadingTexto('La compañera está rebotando...');
-      const turnoIA = generarTurnoCompanera(turnoJugador.ultimaPalabra);
+      setLoadingTexto(esHistoria ? 'La compañera está continuando la historia...' : 'La compañera está rebotando...');
+      let turnoIA: TurnoJuego;
+
+      try {
+        const respuestaIA = esHistoria
+          ? await generarRespuestaHistoriaInterrumpida({ historial: turnosConJugador })
+          : await generarRespuestaCompaneraJuego({
+              palabra: turnoJugador.ultimaPalabra,
+              historial: turnosConJugador,
+            });
+
+        turnoIA = crearTurno({
+          autor: 'ia',
+          texto: respuestaIA,
+          palabraEsperada: esHistoria ? '' : turnoJugador.ultimaPalabra,
+        });
+      } catch (error) {
+        console.warn('Fallback local para la compañera IA:', error);
+        turnoIA = esHistoria
+          ? crearTurnoFallbackHistoria()
+          : generarTurnoCompanera(turnoJugador.ultimaPalabra, turnosConJugador);
+      }
+
       const turnosConIA = [...turnosConJugador, turnoIA];
 
-      palabraEsperadaRef.current = turnoIA.ultimaPalabra;
+      palabraEsperadaRef.current = esHistoria ? '' : turnoIA.ultimaPalabra;
       setTurnos(turnosConIA);
       turnosRef.current = turnosConIA;
       setLoading(false);
@@ -139,7 +182,7 @@ export function useGamesController() {
         recorderRef.current?.iniciarGrabacion();
       });
     } catch (error) {
-      console.error('Fallo en el juego Si yo fuera:', error);
+      console.error('Fallo en el juego:', error);
       finalizarPartida(turnosRef.current);
     }
   }, [finalizarPartida, vozCompanera]);

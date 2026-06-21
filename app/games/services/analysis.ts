@@ -18,6 +18,8 @@ const PALABRAS_VACIAS = new Set([
   'ellos',
   'en',
   'entre',
+  'fuera',
+  'fuese',
   'hacia',
   'hasta',
   'la',
@@ -88,7 +90,7 @@ export function palabrasCompatibles(a: string, b: string): boolean {
 
 export function extraerEstimulo(frase: string): string {
   const fraseLimpia = normalizarTextoVisible(frase).trim();
-  const despuesDeInicio = fraseLimpia.replace(/^si\s+yo\s+fuera\s+/i, '').trim();
+  const despuesDeInicio = fraseLimpia.replace(/^si\s+yo\s+(fuera|fuese)\s+/i, '').trim();
   const hastaPredicado = despuesDeInicio.split(/\b(seria|sería|tendria|tendría|haria|haría|podria|podría|estaria|estaría|me|rodaria|rodaría|recibiria|recibiría|llamaria|llamaría)\b/i)[0];
   const palabras = extraerPalabras(limpiarArticuloInicial(hastaPredicado));
 
@@ -130,7 +132,7 @@ export function evaluarTurnosSiYoFuera(turnos: TurnoJuego[]): EvaluacionJuego {
     return {
       aprobado: false,
       comentario:
-        'No he detectado ninguna intervención del jugador. Empieza con una frase completa: "Si yo fuera..., sería...".',
+        'No he detectado ninguna intervención del jugador. Empieza con una frase completa: "Si yo fuera..." o "Si yo fuese...".',
       turnos,
       turnosJugador: 0,
       rebotesCorrectosJugador: 0,
@@ -166,5 +168,41 @@ export function evaluarTurnosSiYoFuera(turnos: TurnoJuego[]): EvaluacionJuego {
     turnos,
     turnosJugador: turnosJugador.length,
     rebotesCorrectosJugador,
+  };
+}
+
+export function evaluarHistoriaInterrumpida(turnos: TurnoJuego[]): EvaluacionJuego {
+  const turnosJugador = turnos.filter((turno) => turno.autor === 'jugador');
+  const turnosIA = turnos.filter((turno) => turno.autor === 'ia');
+
+  if (turnosJugador.length === 0) {
+    return {
+      aprobado: false,
+      comentario:
+        'No he detectado ninguna intervención del jugador. Empieza narrando una historia en pasado y en primera persona.',
+      turnos,
+      turnosJugador: 0,
+      rebotesCorrectosJugador: 0,
+    };
+  }
+
+  if (turnosJugador.length < 2 || turnosIA.length < 1) {
+    return {
+      aprobado: false,
+      comentario:
+        'La historia ha empezado, pero todavía necesita más ida y vuelta. Acepta la frase de la IA y continúa desde ahí.',
+      turnos,
+      turnosJugador: turnosJugador.length,
+      rebotesCorrectosJugador: turnosJugador.length,
+    };
+  }
+
+  return {
+    aprobado: true,
+    comentario:
+      'Buen trabajo de aceptación. La historia se construye por turnos y cada intervención recoge la propuesta anterior para seguir avanzando.',
+    turnos,
+    turnosJugador: turnosJugador.length,
+    rebotesCorrectosJugador: turnosJugador.length,
   };
 }

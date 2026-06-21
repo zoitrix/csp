@@ -1,6 +1,6 @@
 export type PantallaJuego = 'config' | 'jugando' | 'feedback';
 
-export type JuegoId = 'si-yo-fuera';
+export type JuegoId = 'si-yo-fuera' | 'historia-interrumpida';
 
 export type AutorTurno = 'jugador' | 'ia';
 

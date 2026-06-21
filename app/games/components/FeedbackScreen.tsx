@@ -20,6 +20,8 @@ export function FeedbackScreen({
   onReintentar,
   textoUsuario,
 }: FeedbackScreenProps) {
+  const esHistoria = juego.id === 'historia-interrumpida';
+
   return (
     <div className={styles.bloqueFeedback}>
       <div className={styles.carteleraTitulo}>
@@ -27,7 +29,10 @@ export function FeedbackScreen({
       </div>
 
       <div className={styles.recuadroExplicativo}>
-        <strong>Objetivo revisado:</strong> escucha activa y rebote desde la última palabra de la compañera IA.
+        <strong>Objetivo revisado:</strong>{' '}
+        {esHistoria
+          ? 'aceptación de propuestas, adaptación y avance de la narración.'
+          : 'escucha activa y rebote desde la última palabra de la compañera IA.'}
       </div>
 
       <div className={styles.recuadroTuTexto}>
@@ -58,15 +63,19 @@ export function FeedbackScreen({
           <>
             <p className={styles.textoFeedback}>{evaluacion.comentario}</p>
             <p className={styles.textoFeedback}>
-              Turnos del jugador: <strong>{evaluacion.turnosJugador}</strong>. Rebotes correctos:{' '}
-              <strong>{evaluacion.rebotesCorrectosJugador}</strong>.
+              Turnos del jugador: <strong>{evaluacion.turnosJugador}</strong>
+              {!esHistoria && (
+                <>
+                  . Rebotes correctos: <strong>{evaluacion.rebotesCorrectosJugador}</strong>
+                </>
+              )}
             </p>
             {evaluacion.turnos.length > 0 && (
               <div className={styles.recuadroExplicativo} style={{ backgroundColor: '#fffdf5', marginTop: '12px' }}>
                 {evaluacion.turnos.map((turno, index) => (
                   <p key={`${turno.autor}-${turno.texto}-${index}`} style={{ marginTop: index === 0 ? 0 : undefined }}>
                     <strong>{turno.autor === 'jugador' ? 'Tú' : 'IA'}:</strong> {turno.texto}
-                    {turno.autor === 'jugador' && turno.palabraEsperada && (
+                    {!esHistoria && turno.autor === 'jugador' && turno.palabraEsperada && (
                       <span style={{ color: turno.reboteCorrecto ? '#0f7b37' : '#b92929', fontWeight: 700 }}>
                         {' '}
                         {turno.reboteCorrecto ? 'Rebote correcto.' : `Debía partir de "${turno.palabraEsperada}".`}
