@@ -3,6 +3,7 @@ import { PATRONES_WHISPER_FANTASMA } from '../constants';
 import { crearPromptCoactor, crearPromptDirector } from '../prompts';
 import type { DificultadChat, EvaluacionActo, FaseActo, MensajeChat } from '../types';
 import { generarTituloComun } from '../../shared/titleGeneration';
+import { MODELO_CHAT_GROQ } from '../../shared/groqConfig';
 import { normalizarTextoVisible } from '../../shared/textEncoding';
 
 const MAX_MENSAJES_MODELO = 10;
@@ -195,7 +196,7 @@ export async function transcribirTurno(audioBlob: Blob | null): Promise<string> 
 export async function generarReplicaCoactor(historial: MensajeChat[]): Promise<string> {
   const groq = crearClienteGroq();
   const response = await groq.chat.completions.create({
-    model: 'llama-3.1-8b-instant',
+    model: MODELO_CHAT_GROQ,
     messages: [
       { role: 'system', content: crearPromptCoactor(historial) },
       ...crearMensajesModelo(historial),
@@ -216,7 +217,7 @@ export async function evaluarActoDirector(params: {
   const groq = crearClienteGroq();
   const propuestaFinal = params.textoActor.trim() ? params.textoActor : '[SIN_RESPUESTA]';
   const response = await groq.chat.completions.create({
-    model: 'llama-3.1-8b-instant',
+    model: MODELO_CHAT_GROQ,
     messages: [{ role: 'user', content: crearPromptDirector(params) }],
     temperature: 0.1,
     max_tokens: 160,

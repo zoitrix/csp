@@ -1,5 +1,6 @@
 import { OpenAI } from 'openai';
 import { crearAvisoVariedadTitulos, tituloSePareceAHistorial } from './titleSimilarity';
+import { MODELO_CHAT_GROQ } from './groqConfig';
 import { normalizarTextoVisible } from './textEncoding';
 
 const INTENTOS_TITULO = 4;
@@ -417,7 +418,7 @@ export async function generarTituloComun(dificultad: string, titulos: string[]):
   for (let intento = 0; intento < INTENTOS_TITULO; intento += 1) {
     const historialParaPrompt = [...titulos, ...rechazados];
     const response = await groq.chat.completions.create({
-      model: 'llama-3.1-8b-instant',
+      model: MODELO_CHAT_GROQ,
       messages: [{ role: 'user', content: crearPromptTitulo(dificultad, historialParaPrompt) }],
       temperature: Math.min(getTemperaturaTitulo(dificultad) + intento * 0.08, 1.05),
       presence_penalty: 0.7,

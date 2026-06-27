@@ -3,6 +3,7 @@ import { ALUCINACIONES_WHISPER, TAMANO_MINIMO_VOZ } from '../constants';
 import { crearPromptDirector } from '../prompts';
 import type { DificultadImpro, EvaluacionDirector, FaseActo, ObraHistorial } from '../types';
 import { generarTituloComun } from '../../shared/titleGeneration';
+import { MODELO_CHAT_GROQ } from '../../shared/groqConfig';
 import { normalizarTextoVisible } from '../../shared/textEncoding';
 
 function crearClienteGroq(): OpenAI {
@@ -76,7 +77,7 @@ export async function evaluarActoConDirector(params: {
 }): Promise<EvaluacionDirector> {
   const groq = crearClienteGroq();
   const response = await groq.chat.completions.create({
-    model: 'llama-3.1-8b-instant',
+    model: MODELO_CHAT_GROQ,
     messages: [{ role: 'user', content: crearPromptDirector(params) }],
     temperature: 0.2,
     max_tokens: 150,

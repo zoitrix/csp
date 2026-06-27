@@ -5,6 +5,7 @@ import {
   generarTituloImpro as generarTituloStructure,
   transcribirAudioImpro as transcribirAudioStructure,
 } from '../../structure/services/groq';
+import { MODELO_CHAT_GROQ } from '../../shared/groqConfig';
 import { normalizarTextoVisible } from '../../shared/textEncoding';
 
 const PALABRAS_VACIAS_LITERALIDAD = new Set([
@@ -161,7 +162,7 @@ export async function evaluarInicioConDirector(params: {
 }): Promise<EvaluacionDirector> {
   const groq = crearClienteGroq();
   const response = await groq.chat.completions.create({
-    model: 'llama-3.1-8b-instant',
+    model: MODELO_CHAT_GROQ,
     messages: [{ role: 'user', content: crearPromptDirectorInicio(params) }],
     temperature: 0.2,
     max_tokens: 180,

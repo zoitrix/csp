@@ -1,6 +1,7 @@
 import { OpenAI } from 'openai';
 import { normalizarTextoVisible } from '../../shared/textEncoding';
 import { transcribirAudioImpro } from '../../structure/services/groq';
+import { MODELO_CHAT_GROQ } from '../../shared/groqConfig';
 import { extraerUltimaPalabra, normalizarComparacion } from './analysis';
 import type { EvaluacionProblema, TurnoJuego } from '../types';
 
@@ -99,7 +100,7 @@ export async function generarRespuestaCompaneraJuego(params: {
 }): Promise<string> {
   const groq = crearClienteGroq();
   const response = await groq.chat.completions.create({
-    model: 'llama-3.1-8b-instant',
+    model: MODELO_CHAT_GROQ,
     messages: [{ role: 'user', content: crearPromptCompaneraSiYoFuera(params.palabra, params.historial) }],
     temperature: 0.75,
     max_tokens: 36,
@@ -136,7 +137,7 @@ export async function generarRespuestaHistoriaInterrumpida(params: {
 }): Promise<string> {
   const groq = crearClienteGroq();
   const response = await groq.chat.completions.create({
-    model: 'llama-3.1-8b-instant',
+    model: MODELO_CHAT_GROQ,
     messages: [{ role: 'user', content: crearPromptHistoriaInterrumpida(params.historial) }],
     temperature: 0.72,
     max_tokens: 42,
@@ -175,7 +176,7 @@ export async function generarProblemaPortero(params: {
 }): Promise<string> {
   const groq = crearClienteGroq();
   const response = await groq.chat.completions.create({
-    model: 'llama-3.1-8b-instant',
+    model: MODELO_CHAT_GROQ,
     messages: [{ role: 'user', content: crearPromptProblemaPortero(params.historial) }],
     temperature: 0.88,
     max_tokens: 44,
@@ -240,7 +241,7 @@ export async function evaluarRespuestasPortero(params: {
 
   const groq = crearClienteGroq();
   const response = await groq.chat.completions.create({
-    model: 'llama-3.1-8b-instant',
+    model: MODELO_CHAT_GROQ,
     messages: [{ role: 'user', content: crearPromptEvaluacionPortero(pares) }],
     temperature: 0.2,
     max_tokens: Math.min(1100, 220 + pares.length * 130),

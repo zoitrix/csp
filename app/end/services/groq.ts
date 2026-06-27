@@ -3,6 +3,7 @@ import { ALUCINACIONES_WHISPER, TAMANO_MINIMO_VOZ } from '../../structure/consta
 import { crearPromptDirectorFinal, crearPromptEscenaFinal } from '../prompts';
 import type { DificultadEnd, EscenaFinal, EvaluacionDirector, TipoFinal } from '../types';
 import { generarTituloComun } from '../../shared/titleGeneration';
+import { MODELO_CHAT_GROQ } from '../../shared/groqConfig';
 import { normalizarTextoVisible } from '../../shared/textEncoding';
 
 function crearClienteGroq(): OpenAI {
@@ -211,7 +212,7 @@ export async function generarEscenaParaFinal(params: {
 
   for (let intento = 0; intento < 3; intento += 1) {
     const response = await groq.chat.completions.create({
-      model: 'llama-3.1-8b-instant',
+      model: MODELO_CHAT_GROQ,
       messages: [{ role: 'user', content: crearPromptEscenaFinal(params) }],
       temperature: Math.min(0.75 + intento * 0.1, 0.95),
       max_tokens: 180,
@@ -272,7 +273,7 @@ export async function evaluarFinalConDirector(params: {
 }): Promise<EvaluacionDirector> {
   const groq = crearClienteGroq();
   const response = await groq.chat.completions.create({
-    model: 'llama-3.1-8b-instant',
+    model: MODELO_CHAT_GROQ,
     messages: [{ role: 'user', content: crearPromptDirectorFinal(params) }],
     temperature: 0.2,
     max_tokens: 190,
