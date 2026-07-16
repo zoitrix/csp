@@ -6,6 +6,9 @@ import { normalizarTextoVisible } from './textEncoding';
 const INTENTOS_TITULO = 4;
 const MAX_TITULOS_HISTORIAL_PROMPT = 3;
 const CANDIDATOS_TITULO_POR_INTENTO = 3;
+// GPT-OSS consume parte de este presupuesto en razonamiento, incluso con esfuerzo bajo.
+// 1024 evita que termine por longitud antes de emitir las tres líneas visibles.
+const MAX_TOKENS_RESPUESTA_TITULOS = 1024;
 
 const FORMAS_SINTACTICAS = [
   'pregunta',
@@ -175,13 +178,13 @@ function crearPromptTitulo(dificultad: string, titulos: string[]): string {
 
   return `Da ${CANDIDATOS_TITULO_POR_INTENTO} titulos de impro en espanol, uno por linea.
 Forma: ${formaSintactica}. Nivel ${dificultadNormalizada}: ${crearGuiaDificultadTitulo(dificultad)}
-Reglas: 4-7 palabras; frase completa, natural, logica y jugable; concordancia correcta; solo mayuscula inicial; sin nombres propios, siglas, comillas, markdown, palabras inventadas, "usted/ustedes", ni "se divierte a alguien".
+Reglas: cada titulo debe tener 4-7 palabras; frase completa, natural, logica y jugable; concordancia correcta; solo mayuscula inicial; sin nombres propios, siglas, comillas, markdown, palabras inventadas, "usted/ustedes", ni "se divierte a alguien".
 Evita estructuras y palabras recientes. Historial: ${historialTitulos}.
 ${avisoVariedad}
-Solo las ${CANDIDATOS_TITULO_POR_INTENTO} lineas:`;
+Escribe exactamente ${CANDIDATOS_TITULO_POR_INTENTO} lineas, sin numeracion, explicaciones ni lineas vacias:`;
 }
 
-function elegirTituloFallback(dificultad: string, titulos: string[], rechazados: string[]): string {
+function elegirTituloFallback(dificultad: string, titulos: string[]): string {
   const dificultadNormalizada = normalizarDificultad(dificultad);
   const titulosBase =
     dificultadNormalizada === 'facil'
@@ -205,13 +208,22 @@ function elegirTituloFallback(dificultad: string, titulos: string[], rechazados:
             'El calendario demanda testigos',
           ];
 
-  return (
-    titulosBase.find(
-      (titulo) =>
-        tituloTieneSentidoBasico(titulo) &&
-        !tituloSePareceAHistorial(titulo, [...titulos, ...rechazados]),
-    ) || titulosBase[0]
+  const tituloNuevo = titulosBase.find(
+    (titulo) => tituloTieneSentidoBasico(titulo) && !tituloSePareceAHistorial(titulo, titulos),
   );
+
+  if (tituloNuevo) {
+    return tituloNuevo;
+  }
+
+  // Si todos se parecen al historial, evita al menos repetir literalmente uno ya usado.
+  // Los candidatos rechazados por el modelo no deben bloquear también los fallbacks seguros.
+  const titulosNormalizados = new Set(titulos.map(normalizarTituloParaValidacion));
+  const tituloNoUsado = titulosBase.find(
+    (titulo) => !titulosNormalizados.has(normalizarTituloParaValidacion(titulo)),
+  );
+
+  return tituloNoUsado || titulosBase[titulos.length % titulosBase.length];
 }
 
 function tituloUsaPlantillaPersonalObvia(titulo: string): boolean {
@@ -329,7 +341,9 @@ function tituloTieneSentidoBasico(titulo: string): boolean {
   const palabras = extraerPalabrasTitulo(titulo);
   const ultimaPalabra = palabras[palabras.length - 1];
 
-  if (palabras.length < 4 || palabras.length > 7) {
+  // Se pide 4-7 al modelo, pero una frase natural de 8 palabras sigue siendo válida.
+  // Esta pequeña tolerancia evita descartar buenos títulos por una sola palabra funcional.
+  if (palabras.length < 4 || palabras.length > 8) {
     return false;
   }
 
@@ -413,6 +427,12 @@ function getTemperaturaTitulo(dificultad: string): number {
 export async function generarTituloComun(dificultad: string, titulos: string[]): Promise<string> {
   const groq = crearClienteGroq();
   const rechazados: string[] = [];
+  const respuestasSinCandidatos: Array<{
+    intento: number;
+    finishReason: string | null;
+    contenido: string;
+    completionTokens: number | null;
+  }> = [];
   let mejorTitulo = '';
 
   for (let intento = 0; intento < INTENTOS_TITULO; intento += 1) {
@@ -423,12 +443,28 @@ export async function generarTituloComun(dificultad: string, titulos: string[]):
       temperature: Math.min(getTemperaturaTitulo(dificultad) + intento * 0.08, 1.05),
       presence_penalty: 0.7,
       frequency_penalty: 0.5,
-      max_tokens: 45,
+      reasoning_effort: 'low',
+      max_completion_tokens: MAX_TOKENS_RESPUESTA_TITULOS,
     });
 
-    const candidatos = extraerTitulosGenerados(response.choices[0]?.message?.content?.trim() || '');
+    const choice = response.choices[0];
+    const contenido = choice?.message?.content?.trim() || '';
+    const candidatos = extraerTitulosGenerados(contenido);
 
     if (candidatos.length === 0) {
+      const diagnosticoRespuestaVacia = {
+        intento: intento + 1,
+        finishReason: choice?.finish_reason || null,
+        contenido,
+        completionTokens: response.usage?.completion_tokens ?? null,
+      };
+
+      respuestasSinCandidatos.push(diagnosticoRespuestaVacia);
+
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('Groq no devolvio candidatos de titulo en este intento.', diagnosticoRespuestaVacia);
+      }
+
       continue;
     }
 
@@ -453,5 +489,13 @@ export async function generarTituloComun(dificultad: string, titulos: string[]):
     return mejorTitulo;
   }
 
-  return elegirTituloFallback(dificultad, titulos, rechazados);
+  if (process.env.NODE_ENV === 'development') {
+    console.warn('Se usa un titulo fallback: Groq no produjo candidatos validos.', {
+      dificultad: normalizarDificultad(dificultad),
+      candidatosRechazados: rechazados,
+      respuestasSinCandidatos,
+    });
+  }
+
+  return elegirTituloFallback(dificultad, titulos);
 }

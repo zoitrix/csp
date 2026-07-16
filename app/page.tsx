@@ -3,11 +3,11 @@ import styles from './home.module.css';
 
 const menuItems = [
   {
-    title: 'Arco Dramático',
+    title: 'Estructuras',
     description:
       'Entrena la construcción de una historia por actos: inicio, giros y desenlace.',
     href: '/structure',
-    action: 'Practicar arco',
+    action: 'Practicar estructuras',
   },
   {
     title: 'Inicios',
@@ -44,7 +44,7 @@ export default function HomePage() {
     <main className={styles.teatroContainer}>
       <header className={styles.teatroHeader}>
         <h1>Impro TrAIner</h1>
-        <p className={styles.subtitulo}>Elige tu escenario de entrenamiento (v0.35)</p>
+        <p className={styles.subtitulo}>Elige tu escenario de entrenamiento (v0.36)</p>
       </header>
 
       <section className={styles.escenario} aria-label="Menú principal">
