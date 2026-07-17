@@ -14,7 +14,7 @@ const FORMAS_SINTACTICAS = [
   'pregunta',
   'orden',
   'aviso',
-  'titular',
+  'noticia contada en lenguaje natural',
   'queja',
   'rumor',
   'frase oida al pasar',
@@ -178,10 +178,14 @@ function crearPromptTitulo(dificultad: string, titulos: string[]): string {
 
   return `Da ${CANDIDATOS_TITULO_POR_INTENTO} titulos de impro en espanol, uno por linea.
 Forma: ${formaSintactica}. Nivel ${dificultadNormalizada}: ${crearGuiaDificultadTitulo(dificultad)}
-Reglas: cada titulo debe tener 4-7 palabras; frase completa, natural, logica y jugable; concordancia correcta; solo mayuscula inicial; sin nombres propios, siglas, comillas, markdown, palabras inventadas, "usted/ustedes", ni "se divierte a alguien".
+Reglas: cada titulo debe tener 5-9 palabras; frase completa, natural, logica y jugable; concordancia y preposiciones correctas; solo mayuscula inicial; sin nombres propios, siglas, comillas, markdown, palabras inventadas, "usted/ustedes", ni "se divierte a alguien".
+Escribe como una frase narrativa, no como un titular de prensa telegrafico. No omitas articulos para acortar: un sustantivo comun contable en singular que funciona como sujeto debe llevar normalmente un determinante como "el", "la", "un" o "una".
+Comprueba el significado de las preposiciones: distingue, por ejemplo, entre pedir pizza "a la luna" y pedir pizza "de luna".
+Mal: Invasion de luces parpadeantes causa confusion. Bien: Una invasion de luces parpadeantes causa confusion.
+Mal: Mano gigante exige pizza de luna. Bien: Una mano gigante exige pizza a la luna.
 Evita estructuras y palabras recientes. Historial: ${historialTitulos}.
 ${avisoVariedad}
-Escribe exactamente ${CANDIDATOS_TITULO_POR_INTENTO} lineas, sin numeracion, explicaciones ni lineas vacias:`;
+Ordena primero el titulo que suene mas natural en espanol. Escribe exactamente ${CANDIDATOS_TITULO_POR_INTENTO} lineas, sin numeracion, explicaciones ni lineas vacias:`;
 }
 
 function elegirTituloFallback(dificultad: string, titulos: string[]): string {
@@ -341,9 +345,9 @@ function tituloTieneSentidoBasico(titulo: string): boolean {
   const palabras = extraerPalabrasTitulo(titulo);
   const ultimaPalabra = palabras[palabras.length - 1];
 
-  // Se pide 4-7 al modelo, pero una frase natural de 8 palabras sigue siendo válida.
-  // Esta pequeña tolerancia evita descartar buenos títulos por una sola palabra funcional.
-  if (palabras.length < 4 || palabras.length > 8) {
+  // Se pide 5-9 al modelo, con una palabra de tolerancia en ambos extremos.
+  // Los artículos y las preposiciones necesarias no deben penalizar un título natural.
+  if (palabras.length < 4 || palabras.length > 10) {
     return false;
   }
 
