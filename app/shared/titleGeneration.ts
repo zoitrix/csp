@@ -10,17 +10,17 @@ const CANDIDATOS_TITULO_POR_INTENTO = 3;
 // 1024 evita que termine por longitud antes de emitir las tres líneas visibles.
 const MAX_TOKENS_RESPUESTA_TITULOS = 1024;
 
-const FORMAS_SINTACTICAS = [
-  'pregunta',
-  'orden',
-  'aviso',
-  'noticia contada en lenguaje natural',
-  'queja',
-  'rumor',
-  'frase oida al pasar',
-  'cartel',
-  'consigna',
-  'enunciado absurdo',
+const FAMILIAS_SINTACTICAS = [
+  'pregunta completa',
+  'orden o peticion',
+  'afirmacion cotidiana',
+  'frase de dialogo oida al pasar',
+  'situacion con lugar o momento',
+  'condicion o consecuencia',
+  'contraste introducido por pero o aunque',
+  'sintagma nominal evocador, sin accion obligatoria',
+  'queja, aviso o rumor expresado con naturalidad',
+  'conflicto concreto entre personas',
 ];
 
 const CIERRES_GRAMATICALES_DEBILES = new Set([
@@ -121,8 +121,19 @@ const PALABRAS_DEFORMADAS_FRECUENTES = new Set([
   'vecindarioa',
 ]);
 
-function elegirFormaSintactica(): string {
-  return FORMAS_SINTACTICAS[Math.floor(Math.random() * FORMAS_SINTACTICAS.length)];
+function mezclar<T>(elementos: T[]): T[] {
+  const resultado = [...elementos];
+
+  for (let indice = resultado.length - 1; indice > 0; indice -= 1) {
+    const intercambio = Math.floor(Math.random() * (indice + 1));
+    [resultado[indice], resultado[intercambio]] = [resultado[intercambio], resultado[indice]];
+  }
+
+  return resultado;
+}
+
+function elegirFamiliasSintacticas(cantidad: number): string[] {
+  return mezclar(FAMILIAS_SINTACTICAS).slice(0, cantidad);
 }
 
 function crearClienteGroq(): OpenAI {
@@ -174,18 +185,23 @@ function crearPromptTitulo(dificultad: string, titulos: string[]): string {
   const historialTitulos = historialReciente.length > 0 ? historialReciente.join(' | ') : 'ninguno';
   const avisoVariedad = crearAvisoVariedadTitulos(historialReciente);
   const dificultadNormalizada = normalizarDificultad(dificultad).toUpperCase();
-  const formaSintactica = elegirFormaSintactica();
+  const familiasSintacticas = elegirFamiliasSintacticas(CANDIDATOS_TITULO_POR_INTENTO);
+  const familiasEnumeradas = familiasSintacticas
+    .map((familia, indice) => `${indice + 1}. ${familia}`)
+    .join('\n');
 
   return `Da ${CANDIDATOS_TITULO_POR_INTENTO} titulos de impro en espanol, uno por linea.
-Forma: ${formaSintactica}. Nivel ${dificultadNormalizada}: ${crearGuiaDificultadTitulo(dificultad)}
-Reglas: cada titulo debe tener 5-9 palabras; frase completa, natural, logica y jugable; concordancia y preposiciones correctas; solo mayuscula inicial; sin nombres propios, siglas, comillas, markdown, palabras inventadas, "usted/ustedes", ni "se divierte a alguien".
-Escribe como una frase narrativa, no como un titular de prensa telegrafico. No omitas articulos para acortar: un sustantivo comun contable en singular que funciona como sujeto debe llevar normalmente un determinante como "el", "la", "un" o "una".
-Comprueba el significado de las preposiciones: distingue, por ejemplo, entre pedir pizza "a la luna" y pedir pizza "de luna".
-Mal: Invasion de luces parpadeantes causa confusion. Bien: Una invasion de luces parpadeantes causa confusion.
-Mal: Mano gigante exige pizza de luna. Bien: Una mano gigante exige pizza a la luna.
+Nivel ${dificultadNormalizada}: ${crearGuiaDificultadTitulo(dificultad)}
+Usa, en este mismo orden, una familia distinta para cada linea:
+${familiasEnumeradas}
+Reglas: cada titulo debe tener 4-11 palabras; expresion completa, natural, comprensible y jugable; concordancia y preposiciones correctas; solo mayuscula inicial; sin nombres propios, siglas, comillas, markdown, palabras inventadas, "usted/ustedes", ni "se divierte a alguien".
+Un titulo puede ser una situacion, pregunta, orden, pensamiento, lugar, momento, conflicto o frase cotidiana. No tiene que narrar una accion.
+Evita la plantilla "un objeto o fenomeno hace algo a otro objeto". No personifiques objetos salvo que resulte imprescindible y especialmente natural.
+No omitas articulos necesarios para acortar, pero tampoco fuerces todos los titulos a empezar por "el", "la", "un" o "una".
+Comprueba que cada expresion tenga sentido por si sola y que las preposiciones expresen la relacion pretendida.
 Evita estructuras y palabras recientes. Historial: ${historialTitulos}.
 ${avisoVariedad}
-Ordena primero el titulo que suene mas natural en espanol. Escribe exactamente ${CANDIDATOS_TITULO_POR_INTENTO} lineas, sin numeracion, explicaciones ni lineas vacias:`;
+Escribe exactamente ${CANDIDATOS_TITULO_POR_INTENTO} lineas, sin numeracion, explicaciones ni lineas vacias:`;
 }
 
 function elegirTituloFallback(dificultad: string, titulos: string[]): string {
@@ -445,8 +461,6 @@ export async function generarTituloComun(dificultad: string, titulos: string[]):
       model: MODELO_CHAT_GROQ,
       messages: [{ role: 'user', content: crearPromptTitulo(dificultad, historialParaPrompt) }],
       temperature: Math.min(getTemperaturaTitulo(dificultad) + intento * 0.08, 1.05),
-      presence_penalty: 0.7,
-      frequency_penalty: 0.5,
       reasoning_effort: 'low',
       max_completion_tokens: MAX_TOKENS_RESPUESTA_TITULOS,
     });
@@ -472,7 +486,7 @@ export async function generarTituloComun(dificultad: string, titulos: string[]):
       continue;
     }
 
-    for (const titulo of candidatos) {
+    for (const titulo of mezclar(candidatos)) {
       if (!mejorTitulo && tituloTieneSentidoBasico(titulo)) {
         mejorTitulo = titulo;
       }

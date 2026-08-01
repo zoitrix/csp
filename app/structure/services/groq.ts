@@ -80,7 +80,8 @@ export async function evaluarActoConDirector(params: {
     model: MODELO_CHAT_GROQ,
     messages: [{ role: 'user', content: crearPromptDirector(params) }],
     temperature: 0.2,
-    max_tokens: 150,
+    reasoning_effort: 'low',
+    max_completion_tokens: 512,
     response_format: { type: 'json_object' },
   });
 

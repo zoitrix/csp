@@ -215,7 +215,8 @@ export async function generarEscenaParaFinal(params: {
       model: MODELO_CHAT_GROQ,
       messages: [{ role: 'user', content: crearPromptEscenaFinal(params) }],
       temperature: Math.min(0.75 + intento * 0.1, 0.95),
-      max_tokens: 180,
+      reasoning_effort: 'low',
+      max_completion_tokens: 512,
       response_format: { type: 'json_object' },
     });
 
@@ -276,7 +277,8 @@ export async function evaluarFinalConDirector(params: {
     model: MODELO_CHAT_GROQ,
     messages: [{ role: 'user', content: crearPromptDirectorFinal(params) }],
     temperature: 0.2,
-    max_tokens: 190,
+    reasoning_effort: 'low',
+    max_completion_tokens: 512,
     response_format: { type: 'json_object' },
   });
 

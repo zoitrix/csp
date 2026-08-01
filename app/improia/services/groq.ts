@@ -202,7 +202,8 @@ export async function generarReplicaCoactor(historial: MensajeChat[]): Promise<s
       ...crearMensajesModelo(historial),
     ],
     temperature: 0.6,
-    max_tokens: 95,
+    reasoning_effort: 'low',
+    max_completion_tokens: 512,
   });
 
   return normalizarTextoVisible(response.choices[0]?.message?.content?.trim() || 'Continua, te escucho.');
@@ -220,7 +221,8 @@ export async function evaluarActoDirector(params: {
     model: MODELO_CHAT_GROQ,
     messages: [{ role: 'user', content: crearPromptDirector(params) }],
     temperature: 0.1,
-    max_tokens: 160,
+    reasoning_effort: 'low',
+    max_completion_tokens: 512,
     response_format: { type: 'json_object' },
   });
 

@@ -103,7 +103,8 @@ export async function generarRespuestaCompaneraJuego(params: {
     model: MODELO_CHAT_GROQ,
     messages: [{ role: 'user', content: crearPromptCompaneraSiYoFuera(params.palabra, params.historial) }],
     temperature: 0.75,
-    max_tokens: 36,
+    reasoning_effort: 'low',
+    max_completion_tokens: 512,
   });
 
   const texto = limpiarRespuesta(response.choices[0]?.message?.content || '');
@@ -140,7 +141,8 @@ export async function generarRespuestaHistoriaInterrumpida(params: {
     model: MODELO_CHAT_GROQ,
     messages: [{ role: 'user', content: crearPromptHistoriaInterrumpida(params.historial) }],
     temperature: 0.72,
-    max_tokens: 42,
+    reasoning_effort: 'low',
+    max_completion_tokens: 512,
   });
 
   const texto = limpiarRespuesta(response.choices[0]?.message?.content || '');
@@ -179,7 +181,8 @@ export async function generarProblemaPortero(params: {
     model: MODELO_CHAT_GROQ,
     messages: [{ role: 'user', content: crearPromptProblemaPortero(params.historial) }],
     temperature: 0.88,
-    max_tokens: 44,
+    reasoning_effort: 'low',
+    max_completion_tokens: 512,
   });
 
   const texto = limpiarRespuesta(response.choices[0]?.message?.content || '');
@@ -244,7 +247,8 @@ export async function evaluarRespuestasPortero(params: {
     model: MODELO_CHAT_GROQ,
     messages: [{ role: 'user', content: crearPromptEvaluacionPortero(pares) }],
     temperature: 0.2,
-    max_tokens: Math.min(1100, 220 + pares.length * 130),
+    reasoning_effort: 'low',
+    max_completion_tokens: Math.min(1100, 220 + pares.length * 130),
     response_format: { type: 'json_object' },
   });
 
