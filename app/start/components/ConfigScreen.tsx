@@ -3,11 +3,13 @@ import styles from '../../structure/base.module.css';
 import type { DificultadStart, EstrategiaInicio } from '../types';
 
 interface ConfigScreenProps {
+  cuentaAtrasConfig: number;
   dificultad: DificultadStart;
   estrategia: EstrategiaInicio;
   estrategiaId: string;
   estrategias: EstrategiaInicio[];
   loading: boolean;
+  onCuentaAtrasChange: (valor: number) => void;
   onDificultadChange: (dificultad: DificultadStart) => void;
   onEstrategiaChange: (id: string) => void;
   onIniciar: () => void;
@@ -16,11 +18,13 @@ interface ConfigScreenProps {
 }
 
 export function ConfigScreen({
+  cuentaAtrasConfig,
   dificultad,
   estrategia,
   estrategiaId,
   estrategias,
   loading,
+  onCuentaAtrasChange,
   onDificultadChange,
   onEstrategiaChange,
   onIniciar,
@@ -81,6 +85,18 @@ export function ConfigScreen({
             min={1}
             max={300}
             onChange={(event) => onTiempoChange(Number(event.target.value))}
+          />
+        </label>
+
+        <label className={styles.labelStyle} style={{ display: 'flex', flexDirection: 'column', margin: 0 }}>
+          Cuenta atrás antes de empezar (segundos)
+          <input
+            type="number"
+            className={styles.inputTiempoNumber}
+            value={cuentaAtrasConfig}
+            min={1}
+            max={30}
+            onChange={(event) => onCuentaAtrasChange(Number(event.target.value))}
           />
         </label>
       </div>

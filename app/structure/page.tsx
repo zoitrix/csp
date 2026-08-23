@@ -2,6 +2,7 @@
 
 import styles from './base.module.css';
 import { ConfigScreen } from './components/ConfigScreen';
+import { CountdownScreen } from './components/CountdownScreen';
 import { FeedbackScreen } from './components/FeedbackScreen';
 import { FinalScreen } from './components/FinalScreen';
 import { PlayingScreen } from './components/PlayingScreen';
@@ -21,7 +22,9 @@ export default function ImproBaseModularPage() {
         <p className={styles.subtitulo}>
           {controller.pantalla === 'config'
             ? '¡Saca un título y construye tu historia!'
-            : `Fase actual: Acto de ${controller.faseActual.toUpperCase()}`}
+            : controller.pantalla === 'cuentaAtras'
+              ? 'El telón está a punto de subir'
+              : `Fase actual: Acto de ${controller.faseActual.toUpperCase()}`}
         </p>
       </header>
 
@@ -34,14 +37,31 @@ export default function ImproBaseModularPage() {
 
         {controller.pantalla === 'config' && (
           <ConfigScreen
+            cuentaAtrasConfig={controller.cuentaAtrasConfig}
             dificultad={controller.dificultad}
             explicacionInicial={controller.getExplicacionInicial()}
             loading={controller.loading}
+            onCuentaAtrasChange={controller.setCuentaAtrasConfig}
             onDificultadChange={controller.setDificultad}
             onIniciar={controller.iniciarEjercicio}
             onTiempoChange={controller.handleTiempoChange}
             tiemposConfig={controller.tiemposConfig}
           />
+        )}
+
+        {controller.pantalla === 'cuentaAtras' && (
+          <>
+            <div
+              className={styles.recuadroExplicativo}
+              style={{ marginBottom: '15px', backgroundColor: 'rgba(255,255,255,0.05)' }}
+            >
+              <p style={{ margin: 0 }}>
+                <strong>🎯 Objetivo:</strong> Plantea la escena. Muestra claramente la relación de los personajes,
+                el estado anímico, el conflicto y el lugar.
+              </p>
+            </div>
+            <CountdownScreen segundos={controller.cuentaAtras} />
+          </>
         )}
 
         {controller.pantalla === 'jugando' && (

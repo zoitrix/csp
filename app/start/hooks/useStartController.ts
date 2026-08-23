@@ -12,6 +12,8 @@ function buscarEstrategiaPorId(id: string): EstrategiaInicio {
 
 export function useStartController() {
   const [dificultad, setDificultad] = useState<DificultadStart>('media');
+  const [cuentaAtrasConfig, setCuentaAtrasConfig] = useState(5);
+  const [cuentaAtras, setCuentaAtras] = useState(0);
   const [estrategiaId, setEstrategiaId] = useState(ESTRATEGIAS_INICIO[0].id);
   const [tiempoConfig, setTiempoConfig] = useState(TIEMPO_INICIAL);
   const [pantalla, setPantalla] = useState<PantallaStart>('config');
@@ -29,6 +31,7 @@ export function useStartController() {
   const tituloRef = useRef(titulo);
   const estrategiaIdRef = useRef(estrategiaId);
   const tiempoConfigRef = useRef(tiempoConfig);
+  const inicioTrasCuentaAtrasRef = useRef(false);
 
   useEffect(() => {
     tituloRef.current = titulo;
@@ -76,6 +79,21 @@ export function useStartController() {
   const recorder = useNativeRecorder(procesarInicioConWhisperYDirector);
 
   useEffect(() => {
+    if (pantalla !== 'cuentaAtras') return;
+
+    if (cuentaAtras > 0) {
+      const timeout = setTimeout(() => setCuentaAtras((prev) => prev - 1), 1000);
+      return () => clearTimeout(timeout);
+    }
+
+    if (inicioTrasCuentaAtrasRef.current) return;
+    inicioTrasCuentaAtrasRef.current = true;
+    setTimeLeft(tiempoConfigRef.current);
+    setPantalla('jugando');
+    void recorder.iniciarGrabacion();
+  }, [cuentaAtras, pantalla, recorder]);
+
+  useEffect(() => {
     if (pantalla === 'jugando' && timeLeft > 0) {
       timerRef.current = setTimeout(() => setTimeLeft((prev) => prev - 1), 1000);
     } else if (timeLeft === 0 && pantalla === 'jugando' && !esBotonFinalizarRef.current) {
@@ -94,6 +112,8 @@ export function useStartController() {
   const reiniciarEjercicio = useCallback(() => {
     recorder.liberarMicrofono();
     setTitulo('');
+    setCuentaAtras(0);
+    inicioTrasCuentaAtrasRef.current = false;
     setPantalla('config');
     setTextoUsuario('');
     setFeedbackDirector('');
@@ -104,8 +124,10 @@ export function useStartController() {
   const iniciarEjercicio = useCallback(async () => {
     const tiempo = tiempoConfigRef.current;
 
-    if (tiempo <= 0) {
-      alert('Por favor, introduce un tiempo válido mayor a 0 segundos.');
+    const cuentaAtrasInvalida = !Number.isFinite(cuentaAtrasConfig) || cuentaAtrasConfig < 1 || cuentaAtrasConfig > 30;
+
+    if (tiempo <= 0 || cuentaAtrasInvalida) {
+      alert('Introduce un tiempo válido y una cuenta atrás de entre 1 y 30 segundos.');
       return;
     }
 
@@ -115,14 +137,14 @@ export function useStartController() {
     setFeedbackDirector('');
     setAprobadoPorDirector(false);
     esBotonFinalizarRef.current = false;
+    inicioTrasCuentaAtrasRef.current = false;
 
     try {
       const nuevoTitulo = await generarTituloInicio(dificultad, titulos);
       setTitulo(nuevoTitulo);
       setTitulos((prev) => [...prev, nuevoTitulo]);
-      setTimeLeft(tiempo);
-      setPantalla('jugando');
-      await recorder.iniciarGrabacion();
+      setCuentaAtras(cuentaAtrasConfig);
+      setPantalla('cuentaAtras');
     } catch (error) {
       console.error(error);
       alert('Fallo en las luces. Revisa tu configuración o tu API Key de Groq.');
@@ -131,7 +153,7 @@ export function useStartController() {
       setLoading(false);
       setLoadingTexto('');
     }
-  }, [dificultad, recorder, titulos]);
+  }, [cuentaAtrasConfig, dificultad, titulos]);
 
   const terminarInicio = useCallback(() => {
     esBotonFinalizarRef.current = true;
@@ -151,6 +173,8 @@ export function useStartController() {
 
   return {
     aprobadoPorDirector,
+    cuentaAtras,
+    cuentaAtrasConfig,
     dificultad,
     escuchando: recorder.escuchando,
     estrategia: buscarEstrategiaPorId(estrategiaId),
@@ -164,6 +188,7 @@ export function useStartController() {
     pantalla,
     reiniciarEjercicio,
     reintentarInicio,
+    setCuentaAtrasConfig,
     setDificultad,
     setEstrategiaId,
     terminarInicio,

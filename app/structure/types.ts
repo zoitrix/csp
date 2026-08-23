@@ -1,6 +1,6 @@
 export type FaseActo = 'intro' | 'giro1' | 'giro2' | 'desenlace';
 
-export type PantallaImpro = 'config' | 'jugando' | 'feedback' | 'final';
+export type PantallaImpro = 'config' | 'cuentaAtras' | 'jugando' | 'feedback' | 'final';
 
 export type DificultadImpro = 'facil' | 'media' | 'dificil';
 
@@ -23,4 +23,3 @@ export interface EvaluacionDirector {
   aprobado: boolean;
   comentario: string;
 }
-

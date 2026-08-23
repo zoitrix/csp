@@ -1,4 +1,4 @@
-export type PantallaStart = 'config' | 'jugando' | 'feedback';
+export type PantallaStart = 'config' | 'cuentaAtras' | 'jugando' | 'feedback';
 
 export type DificultadStart = 'facil' | 'media' | 'dificil';
 

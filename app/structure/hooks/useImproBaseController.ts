@@ -17,6 +17,8 @@ function getSiguienteFase(fase: FaseActo): FaseActo | null {
 
 export function useImproBaseController() {
   const [dificultad, setDificultad] = useState<DificultadImpro>('media');
+  const [cuentaAtrasConfig, setCuentaAtrasConfig] = useState(5);
+  const [cuentaAtras, setCuentaAtras] = useState(0);
   const [tiemposConfig, setTiemposConfig] = useState<TiemposConfig>(TIEMPOS_INICIALES);
   const [faseActual, setFaseActual] = useState<FaseActo>('intro');
   const [pantalla, setPantalla] = useState<PantallaImpro>('config');
@@ -36,6 +38,7 @@ export function useImproBaseController() {
   const tituloRef = useRef(titulo);
   const obraRef = useRef(obra);
   const tiemposConfigRef = useRef(tiemposConfig);
+  const inicioTrasCuentaAtrasRef = useRef(false);
 
   useEffect(() => {
     faseActualRef.current = faseActual;
@@ -91,6 +94,21 @@ export function useImproBaseController() {
   const recorder = useNativeRecorder(procesarFaseConWhisperYDirector);
 
   useEffect(() => {
+    if (pantalla !== 'cuentaAtras') return;
+
+    if (cuentaAtras > 0) {
+      const timeout = setTimeout(() => setCuentaAtras((prev) => prev - 1), 1000);
+      return () => clearTimeout(timeout);
+    }
+
+    if (inicioTrasCuentaAtrasRef.current) return;
+    inicioTrasCuentaAtrasRef.current = true;
+    setTimeLeft(tiemposConfigRef.current.intro);
+    setPantalla('jugando');
+    void recorder.iniciarGrabacion();
+  }, [cuentaAtras, pantalla, recorder]);
+
+  useEffect(() => {
     if (pantalla === 'jugando' && timeLeft > 0) {
       timerRef.current = setTimeout(() => setTimeLeft((prev) => prev - 1), 1000);
     } else if (timeLeft === 0 && pantalla === 'jugando' && !esBotonFinalizarRef.current) {
@@ -112,6 +130,8 @@ export function useImproBaseController() {
   const reiniciarTeatroCompleto = useCallback(() => {
     recorder.liberarMicrofono();
     setTitulo('');
+    setCuentaAtras(0);
+    inicioTrasCuentaAtrasRef.current = false;
     setFaseActual('intro');
     setPantalla('config');
     setTextoUsuario('');
@@ -122,9 +142,10 @@ export function useImproBaseController() {
   const iniciarEjercicio = useCallback(async () => {
     const tiempos = tiemposConfigRef.current;
     const tiemposInvalidos = Object.values(tiempos).some((tiempo) => tiempo <= 0);
+    const cuentaAtrasInvalida = !Number.isFinite(cuentaAtrasConfig) || cuentaAtrasConfig < 1 || cuentaAtrasConfig > 30;
 
-    if (tiemposInvalidos) {
-      alert('Por favor, introduce tiempos válidos (mayores a 0 segundos) para todos los actos.');
+    if (tiemposInvalidos || cuentaAtrasInvalida) {
+      alert('Introduce tiempos válidos y una cuenta atrás de entre 1 y 30 segundos.');
       return;
     }
 
@@ -135,6 +156,7 @@ export function useImproBaseController() {
     setAprobadoPorDirector(false);
     setFaseActual('intro');
     esBotonFinalizarRef.current = false;
+    inicioTrasCuentaAtrasRef.current = false;
     setObra(OBRA_VACIA);
 
     try {
@@ -142,9 +164,8 @@ export function useImproBaseController() {
       setTitulo(nuevoTitulo);
       setTitulos((prev) => [...prev, nuevoTitulo]);
       setObra((prev) => ({ ...prev, titulo: nuevoTitulo }));
-      setTimeLeft(tiempos.intro);
-      setPantalla('jugando');
-      await recorder.iniciarGrabacion();
+      setCuentaAtras(cuentaAtrasConfig);
+      setPantalla('cuentaAtras');
     } catch (error) {
       console.error(error);
       alert('¡Fallo en las luces! Revisa tu configuración o tu API Key de Groq.');
@@ -153,7 +174,7 @@ export function useImproBaseController() {
       setLoading(false);
       setLoadingTexto('');
     }
-  }, [dificultad, recorder, titulos]);
+  }, [cuentaAtrasConfig, dificultad, titulos]);
 
   const clickBotonTerminarManual = useCallback(() => {
     esBotonFinalizarRef.current = true;
@@ -192,6 +213,8 @@ export function useImproBaseController() {
     aprobadoPorDirector,
     avanzarSiguienteFase,
     clickBotonTerminarManual,
+    cuentaAtras,
+    cuentaAtrasConfig,
     dificultad,
     escuchando: recorder.escuchando,
     faseActual,
@@ -205,6 +228,7 @@ export function useImproBaseController() {
     pantalla,
     reiniciarTeatroCompleto,
     reintentarActoActual,
+    setCuentaAtrasConfig,
     setDificultad,
     textoUsuario,
     tiemposConfig,
@@ -212,4 +236,3 @@ export function useImproBaseController() {
     titulo,
   };
 }
-
